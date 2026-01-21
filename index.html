@@ -9,32 +9,26 @@
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Badges y Botones */
         .badge { display: inline-flex; align-items: center; padding: 0.25em 0.7em; font-size: 0.75rem; font-weight: 700; border-radius: 9999px; line-height: 1; }
         .badge-active { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
         .badge-inactive { color: #b91c1c; background-color: #fee2e2; border: 1px solid #fecaca; }
-        /* NUEVO: Badge para Desconectado */
         .badge-offline { color: #475569; background-color: #f1f5f9; border: 1px solid #cbd5e1; }
         
         .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; }
         .btn-green { background-color: #22c55e; color: white; }
         .btn-red { background-color: #ef4444; color: white; }
         
-        /* Inputs Editables */
         .editable-input { background: transparent; border: 1px solid transparent; width: 100%; padding: 4px 0; font-weight: 600; color: #334155; transition: all 0.2s; }
         .editable-input:disabled { background: transparent; opacity: 1; cursor: default; border-bottom: 1px dashed #e2e8f0; }
         .is-editing .editable-input { background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; }
         .is-editing .editable-input:focus { border-color: #3b82f6; outline: 2px solid #bfdbfe; }
 
-        /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         
-        /* Modal Transitions */
         .modal-open { opacity: 1; pointer-events: auto; }
         .modal-closed { opacity: 0; pointer-events: none; }
         
-        /* Toast Notification */
         #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
         .toast { pointer-events: auto; background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 1rem; align-items: center; }
         .toast.show { transform: translateX(0); }
@@ -45,7 +39,6 @@
     <div id="toast-container"></div>
 
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
         <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
@@ -53,7 +46,6 @@
                 </h1>
                 <p class="text-slate-500 text-sm mt-1">Panel de Administración en Tiempo Real</p>
             </div>
-            <!-- Indicador de Estado -->
             <div id="status-badge" class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200 w-fit transition-colors duration-300">
                 <span class="relative flex h-3 w-3">
                   <span id="ping-animate" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
@@ -63,7 +55,6 @@
             </div>
         </header>
 
-        <!-- Stats -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 grid grid-cols-3 divide-x divide-slate-100">
                 <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</p><p id="total-users" class="text-3xl font-bold text-slate-800 mt-1">0</p></div>
@@ -71,7 +62,6 @@
                 <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactivos</p><p id="inactive-users" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
             </div>
             
-            <!-- Feed de Actividad (Diseño Mejorado) -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full">
                 <div class="flex items-center justify-between mb-4 border-b pb-2 border-slate-100">
                     <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Última Actividad</h2>
@@ -86,14 +76,10 @@
             </div>
         </section>
 
-        <!-- Tabla -->
         <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <h2 class="text-lg font-bold text-slate-800">Directorio de Socios</h2>
-                
-                <!-- Filtros y Búsqueda -->
                 <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <!-- Dropdown de Filtro -->
                     <div class="relative">
                         <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"></i>
                         <select id="filterInput" class="pl-9 pr-8 py-2 border border-slate-200 rounded-lg w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all appearance-none cursor-pointer hover:bg-white">
@@ -103,8 +89,6 @@
                         </select>
                         <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
                     </div>
-
-                    <!-- Input de Búsqueda -->
                     <div class="relative w-full sm:w-auto">
                         <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                         <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all">
@@ -129,93 +113,34 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALLES -->
+    <!-- MODAL -->
     <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 modal-closed backdrop-blur-sm hidden transition-opacity duration-200">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 transition-transform duration-200 flex flex-col max-h-[90vh]">
-            <!-- Modal Header -->
             <div class="flex justify-between items-start p-6 border-b border-slate-100 bg-white rounded-t-2xl z-10 flex-shrink-0">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900 leading-tight" id="modal-nombre-completo">...</h3>
-                    <p class="text-sm text-slate-500 mt-1">ID: <span id="modal-id" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">...</span></p>
-                </div>
-                <div class="flex gap-2">
-                    <button id="toggleEditBtn" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm">
-                        <i class="fas fa-pen mr-1.5"></i> Editar
-                    </button>
-                    <button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
-                        <i class="fas fa-times text-lg"></i>
-                    </button>
-                </div>
+                <div><h3 class="text-xl font-bold text-slate-900 leading-tight" id="modal-nombre-completo">...</h3><p class="text-sm text-slate-500 mt-1">ID: <span id="modal-id" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">...</span></p></div>
+                <div class="flex gap-2"><button id="toggleEditBtn" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm"><i class="fas fa-pen mr-1.5"></i> Editar</button><button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-9 h-9 flex items-center justify-center transition-colors"><i class="fas fa-times text-lg"></i></button></div>
             </div>
-            
-            <!-- Modal Body -->
             <div class="p-6 overflow-y-auto custom-scrollbar flex-1" id="modal-form-container">
-                <!-- Puntos -->
                 <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-100 mb-6 flex justify-between items-center shadow-sm">
-                    <div>
-                        <p class="text-[10px] font-bold text-yellow-600 uppercase mb-1 tracking-wider">Puntos Acumulados</p>
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-trophy text-yellow-500 text-lg"></i>
-                            <p id="modal-puntos-display" class="text-3xl font-bold text-slate-800">0</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-1.5">
-                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-10">-10</button>
-                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-1">-1</button>
-                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="1">+1</button>
-                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="10">+10</button>
-                    </div>
+                    <div><p class="text-[10px] font-bold text-yellow-600 uppercase mb-1 tracking-wider">Puntos Acumulados</p><div class="flex items-center gap-2"><i class="fas fa-trophy text-yellow-500 text-lg"></i><p id="modal-puntos-display" class="text-3xl font-bold text-slate-800">0</p></div></div>
+                    <div class="flex gap-1.5"><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-10">-10</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-1">-1</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="1">+1</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="10">+10</button></div>
                 </div>
-
-                <!-- Campos Editables -->
                 <div class="grid grid-cols-1 gap-5 mb-6">
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-phone-alt"></i> Teléfono</label>
-                        <input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-layer-group"></i> Sección</label>
-                        <input type="text" id="modal-seccion" class="editable-input" disabled placeholder="General">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-file-contract"></i> Contrato</label>
-                        <input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado">
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
-                        <i class="far fa-calendar-alt text-slate-400"></i>
-                        <p class="text-xs text-slate-500">Fecha de Ingreso: <span id="modal-ingreso" class="text-slate-700 font-bold ml-1">-</span></p>
-                    </div>
+                    <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-phone-alt"></i> Teléfono</label><input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar"></div>
+                    <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-layer-group"></i> Sección</label><input type="text" id="modal-seccion" class="editable-input" disabled placeholder="General"></div>
+                    <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-file-contract"></i> Contrato</label><input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado"></div>
+                    <div class="pt-3 border-t border-slate-100 flex items-center gap-2"><i class="far fa-calendar-alt text-slate-400"></i><p class="text-xs text-slate-500">Fecha de Ingreso: <span id="modal-ingreso" class="text-slate-700 font-bold ml-1">-</span></p></div>
                 </div>
-
-                <!-- Botón Guardar (Oculto por defecto) -->
-                <button id="saveChangesBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 hidden transform transition-all active:scale-95 mb-6">
-                    <i class="fas fa-save mr-2"></i> Guardar Cambios
-                </button>
-
-                <!-- Historial -->
+                <button id="saveChangesBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 hidden transform transition-all active:scale-95 mb-6"><i class="fas fa-save mr-2"></i> Guardar Cambios</button>
                 <div class="border-t border-slate-100 pt-5 mb-4">
-                    <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-                        <i class="fas fa-history text-slate-400"></i> Historial de Accesos
-                    </h4>
+                    <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Historial de Accesos</h4>
                     <div class="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-                            <span>Fecha</span>
-                            <span class="text-right">Hora</span>
-                        </div>
-                        <ul id="modal-historial-lista" class="divide-y divide-slate-100 text-sm bg-white max-h-40 overflow-y-auto custom-scrollbar">
-                            <li class="p-4 text-center text-slate-400 italic text-xs">Cargando...</li>
-                        </ul>
+                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><span>Fecha</span><span class="text-right">Hora</span></div>
+                        <ul id="modal-historial-lista" class="divide-y divide-slate-100 text-sm bg-white max-h-40 overflow-y-auto custom-scrollbar"><li class="p-4 text-center text-slate-400 italic text-xs">Cargando...</li></ul>
                     </div>
                     <p class="text-center text-xs text-slate-400 mt-2 italic">Mostrando últimos 20 registros</p>
                 </div>
-
-                <!-- Zona de Peligro -->
-                <div class="border-t border-red-100 bg-red-50/50 rounded-xl p-4 mt-6">
-                    <h4 class="text-xs font-bold text-red-400 uppercase mb-2">Zona de Peligro</h4>
-                    <button id="deleteUserBtn" class="w-full border border-red-200 bg-white text-red-600 hover:bg-red-50 font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center gap-2">
-                        <i class="fas fa-trash-alt"></i> Eliminar Usuario Permanentemente
-                    </button>
-                </div>
+                <div class="border-t border-red-100 bg-red-50/50 rounded-xl p-4 mt-6"><h4 class="text-xs font-bold text-red-400 uppercase mb-2">Zona de Peligro</h4><button id="deleteUserBtn" class="w-full border border-red-200 bg-white text-red-600 hover:bg-red-50 font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"><i class="fas fa-trash-alt"></i> Eliminar Usuario Permanentemente</button></div>
             </div>
         </div>
     </div>
@@ -223,12 +148,10 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURACIÓN ---
-        // IMPORTANTE: REEMPLAZA ESTA URL CON LA NUEVA QUE TE DIO GOOGLE SCRIPT AL IMPLEMENTAR
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
 
         // --- ESTADO Y UI ---
         let state = { users: [], latestTimestamp: null, isFetching: false, currentUser: null, isEditing: false };
-
         const ui = {
             tableBody: document.getElementById('users-table-body'),
             modal: {
@@ -239,357 +162,192 @@
                 editBtn: document.getElementById('toggleEditBtn'), saveBtn: document.getElementById('saveChangesBtn'), closeBtn: document.getElementById('closeModalBtn'),
                 deleteBtn: document.getElementById('deleteUserBtn')
             },
-            searchInput: document.getElementById('searchInput'),
-            filterInput: document.getElementById('filterInput'),
+            searchInput: document.getElementById('searchInput'), filterInput: document.getElementById('filterInput'),
             counters: { total: document.getElementById('total-users'), active: document.getElementById('active-users'), inactive: document.getElementById('inactive-users') },
             activityList: document.getElementById('recent-activity-list'), toastContainer: document.getElementById('toast-container'), 
             statusText: document.getElementById('last-update-text'), statusBadge: document.getElementById('status-badge'),
             pingAnimate: document.getElementById('ping-animate'), pingStatic: document.getElementById('ping-static')
         };
 
-        // --- UTILIDADES ---
         const safe = str => str ? String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])) : '';
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
         const timeAgo = d => { if(!d)return'';const s=Math.floor((new Date()-d)/1000);return s<60?'ahora':s<3600?`${Math.floor(s/60)} min`:`${Math.floor(s/3600)} h`; };
         
-        // --- VISUALIZACIÓN DE ESTADO ---
         const setStatus = (status) => {
-            if(status === 'loading') {
-                ui.statusText.textContent = 'Actualizando...';
-                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-yellow-500';
-            } else if(status === 'success') {
-                ui.statusText.textContent = 'En línea';
-                ui.statusText.className = 'text-xs font-bold text-green-700';
-                ui.statusBadge.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full shadow-sm border border-green-200 w-fit';
-                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500';
-                ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75';
-            } else if(status === 'error') {
-                ui.statusText.textContent = 'Sin conexión';
-                ui.statusText.className = 'text-xs font-bold text-red-700';
-                ui.statusBadge.className = 'flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full shadow-sm border border-red-200 w-fit';
-                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500';
-                ui.pingAnimate.className = 'hidden';
-            }
+            if(status === 'loading') { ui.statusText.textContent = 'Actualizando...'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-yellow-500'; } 
+            else if(status === 'success') { ui.statusText.textContent = 'En línea'; ui.statusText.className = 'text-xs font-bold text-green-700'; ui.statusBadge.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full shadow-sm border border-green-200 w-fit'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500'; ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'; } 
+            else { ui.statusText.textContent = 'Sin conexión'; ui.statusText.className = 'text-xs font-bold text-red-700'; ui.statusBadge.className = 'flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full shadow-sm border border-red-200 w-fit'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500'; ui.pingAnimate.className = 'hidden'; }
         };
 
-        // --- FETCH DATA (CORE) ---
         const fetchData = async () => {
-            if(state.isFetching) return;
-            state.isFetching = true;
-            setStatus('loading');
-            
+            if(state.isFetching) return; state.isFetching = true; setStatus('loading');
             try {
-                const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now(), {
-                    method: 'GET',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
+                const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now());
+                if (!response.ok) throw new Error();
                 const data = await response.json();
-                
-                // Ordenar: Más recientes primero
                 state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
                 
-                // Notificación de nuevo usuario
                 if (state.users.length > 0) {
                     const newest = state.users[0];
-                    if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp) {
-                        showToast(newest);
-                    }
+                    if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp) showToast(newest);
                     state.latestTimestamp = newest.Timestamp;
                 }
-
-                renderTable(); 
-                updateCounters(); 
-                renderActivity();
-                
-                if(state.currentUser) { 
-                    const fresh = state.users.find(u => u['ID de Usuario'] == state.currentUser['ID de Usuario']); 
-                    if(fresh) { 
-                        state.currentUser = fresh; 
-                        if(!state.isEditing) ui.modal.points.textContent = fresh.Puntos || 0; 
-                    } 
-                }
-                
+                renderTable(); updateCounters(); renderActivity();
+                if(state.currentUser) { const fresh = state.users.find(u => u['ID de Usuario'] == state.currentUser['ID de Usuario']); if(fresh) { state.currentUser = fresh; if(!state.isEditing) ui.modal.points.textContent = fresh.Puntos || 0; } }
                 setStatus('success');
-
-            } catch(e) { 
-                console.error("Error Fetch:", e);
-                setStatus('error');
-                if(state.users.length === 0) {
-                    ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50 rounded-lg border border-red-100">Error de conexión. Verifica que el script esté publicado.</td></tr>`;
-                }
-            } finally { 
-                state.isFetching = false; 
-            }
+            } catch(e) { setStatus('error'); if(state.users.length === 0) ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50">Error de conexión.</td></tr>`; } 
+            finally { state.isFetching = false; }
         };
 
-        // --- FUNCIÓN AGREGADA: CERRAR SESIÓN REMOTAMENTE ---
+        // --- FUNCIÓN KICK (Expulsar Usuario) ---
         const kickUser = async (btn) => {
             const id = btn.dataset.id;
-            const originalHTML = btn.innerHTML;
-            
-            // Confirmación visual
             if(!confirm("¿Cerrar la sesión de este usuario?")) return;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-            
+            const originalHTML = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                // Enviamos estado KICK. El cliente lo recibirá, cerrará sesión y pasará a Desconectado.
-                await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify({ action: 'updateStatus', id, status: 'KICK' }) 
-                });
-                
-                showToast({Nombre: "Sesión", Apellido: "Cerrando..."}, 'success'); 
-                fetchData(); 
-            } catch(e) {
-                alert('Error al cerrar sesión: ' + e.message);
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status: 'KICK' }) });
+                showToast({Nombre: "Sesión", Apellido: "Cerrando..."}, 'success'); fetchData(); 
+            } catch(e) { alert('Error: ' + e.message); btn.innerHTML = originalHTML; btn.disabled = false; }
         };
 
-        // --- RENDERIZADO UI ---
-        const renderTable = () => {
-            const searchTerm = ui.searchInput.value.toLowerCase();
-            const filterStatus = ui.filterInput.value;
-
-            const list = state.users.filter(u => {
-                const matchesSearch = (u.Nombre+u.Apellido).toLowerCase().includes(searchTerm);
-                const matchesStatus = filterStatus === 'all' || u.Estado === filterStatus;
-                return matchesSearch && matchesStatus;
-            });
-            
-            ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400">Sin resultados</td></tr>';
-            
-            list.forEach(u => {
-                const active = u.Estado === 'Activo';
-                const inactive = u.Estado === 'Inactivo';
-                const offline = u.Estado === 'Desconectado';
-                const kicked = u.Estado === 'KICK';
-
-                let badgeClass = 'badge-active';
-                let badgeText = 'Activo';
-                let badgeIcon = '<i class="fas fa-check mr-1.5"></i>';
-                let btnHtml = '';
-
-                if (inactive) {
-                    badgeClass = 'badge-inactive'; badgeText = 'Bloqueado'; badgeIcon = '<i class="fas fa-ban mr-1.5"></i>';
-                    btnHtml = `<button class="btn btn-green text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Activo">Desbloquear</button>`;
-                } else if (offline || kicked) {
-                    badgeClass = 'badge-offline'; badgeText = 'Desconectado'; badgeIcon = '<i class="fas fa-power-off mr-1.5"></i>';
-                    btnHtml = `<button class="btn btn-green text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Activo">Activar</button>`;
-                } else {
-                    // Activo
-                    btnHtml = `<button class="btn btn-red text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Inactivo">Bloquear</button>`;
-                }
-
-                ui.tableBody.innerHTML += `
-                <tr class="bg-white hover:bg-slate-50 border-b cursor-pointer tr-user transition-colors group" data-id="${u['ID de Usuario']}">
-                    <td class="px-6 py-4 flex gap-3 font-medium text-slate-900 items-center">
-                        <div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors flex items-center justify-center text-xs font-bold text-slate-500">
-                            ${safe(u.Nombre[0])}${safe(u.Apellido[0])}
-                        </div>
-                        ${safe(u.Nombre)} ${safe(u.Apellido)}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="badge ${badgeClass}">
-                            ${badgeIcon}${badgeText}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 font-bold text-yellow-600">
-                        <div class="flex items-center gap-1"><i class="fas fa-star text-xs text-yellow-400"></i>${u.Puntos||0}</div>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        ${btnHtml}
-                    </td>
-                </tr>`;
-            });
-        };
-
-        const updateCounters = () => {
-            const active = state.users.filter(u=>u.Estado==='Activo').length;
-            ui.counters.total.textContent = state.users.length;
-            ui.counters.active.textContent = active;
-            ui.counters.inactive.textContent = state.users.length - active;
-        };
-
-        // --- RENDERIZADO ACTIVIDAD ---
+        // --- RENDERIZADO ACTIVIDAD RECIENTE (CON LÓGICA DE ESTADO MEJORADA) ---
         const renderActivity = () => {
             ui.activityList.innerHTML = '';
-            
-            if (state.users.length === 0) {
-                 ui.activityList.innerHTML = `<li class="text-center text-slate-400 text-xs py-8">Sin actividad reciente</li>`;
-                 return;
-            }
+            if (state.users.length === 0) { ui.activityList.innerHTML = `<li class="text-center text-slate-400 text-xs py-8">Sin actividad reciente</li>`; return; }
 
             state.users.slice(0, 6).forEach(u => {
-                const active = u.Estado === 'Activo';
-                const kicked = u.Estado === 'KICK';
-                const offline = u.Estado === 'Desconectado';
                 const initials = (safe(u.Nombre[0]) + safe(u.Apellido[0])).toUpperCase();
                 
-                // Botón de Kick solo si está activo
-                const kickBtn = active ? 
-                    `<button class="btn-kick ml-2 text-slate-400 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50" title="Cerrar Sesión" data-id="${u['ID de Usuario']}">
-                        <i class="fas fa-power-off"></i>
-                    </button>` : '';
-
-                let statusDot = 'bg-green-500';
-                let statusText = `<span class="text-green-600 font-semibold">Activo</span>`;
+                // Lógica de Tiempo Real: Si hace más de 12 min no hay latido, está ausente (o se cerró mal)
+                const lastSeen = parseDate(u.Timestamp);
+                const minutesAgo = (new Date() - lastSeen) / 1000 / 60;
+                
+                let statusTextHtml = '';
+                let statusDotClass = '';
+                let showKickButton = false;
 
                 if (u.Estado === 'Inactivo') {
-                    statusDot = 'bg-red-500'; statusText = `<span class="text-red-600 font-semibold">Bloqueado</span>`;
-                } else if (offline) {
-                    statusDot = 'bg-slate-400'; statusText = `<span class="text-slate-500 font-semibold">Desconectado</span>`;
-                } else if (kicked) {
-                    statusDot = 'bg-yellow-400 animate-pulse'; statusText = `<span class="text-yellow-600 font-bold italic">Cerrando...</span>`;
+                    // Estado Bloqueado (Base de datos manda)
+                    statusTextHtml = `<span class="text-red-600 font-semibold">Bloqueado</span>`;
+                    statusDotClass = 'bg-red-500';
+                } else if (u.Estado === 'Desconectado') {
+                    // Estado Desconectado explícito (Usuario cerró o se minimizó)
+                    statusTextHtml = `<span class="text-slate-400 font-semibold">Desconectado</span>`;
+                    statusDotClass = 'bg-slate-300';
+                } else if (u.Estado === 'KICK') {
+                    // Estado Transitorio
+                    statusTextHtml = `<span class="text-yellow-600 font-bold italic">Cerrando...</span>`;
+                    statusDotClass = 'bg-yellow-400 animate-pulse';
+                } else if (u.Estado === 'Activo') {
+                    // Estado Activo: Revisamos el tiempo para saber si es "En Línea" o "Ausente"
+                    if (minutesAgo < 12) {
+                        statusTextHtml = `<span class="text-green-600 font-bold">En Línea</span>`;
+                        statusDotClass = 'bg-green-500 animate-pulse';
+                        showKickButton = true; // Botón disponible
+                    } else {
+                        statusTextHtml = `<span class="text-orange-500 font-semibold">Ausente / Sin cerrar</span>`;
+                        statusDotClass = 'bg-orange-400';
+                        showKickButton = true; // Botón disponible por si queremos forzar cierre
+                    }
                 }
+
+                // Botón Kick
+                const kickBtnHtml = showKickButton ? 
+                    `<button class="btn-kick ml-2 text-slate-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50" title="Cerrar sesión" data-id="${u['ID de Usuario']}">
+                        <i class="fas fa-power-off"></i>
+                    </button>` : '';
 
                 ui.activityList.innerHTML += `
                 <li class="relative flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-all duration-200 group cursor-default">
                     <div class="relative flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs border border-slate-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">
-                            ${initials}
-                        </div>
-                        <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${statusDot}"></span>
+                        <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs border border-slate-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">${initials}</div>
+                        <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${statusDotClass}"></span>
                     </div>
-
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-bold text-slate-800 truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
-                        <p class="text-[11px] text-slate-500 truncate">
-                            Estado: ${statusText}
-                        </p>
+                        <p class="text-[11px] text-slate-500 truncate">${statusTextHtml}</p>
                     </div>
-
                     <div class="flex items-center gap-1">
-                        <div class="text-[10px] font-medium text-slate-400 whitespace-nowrap bg-slate-50 px-2 py-1 rounded">
-                            ${timeAgo(parseDate(u.Timestamp))}
-                        </div>
-                        ${kickBtn}
+                        <div class="text-[10px] font-medium text-slate-400 whitespace-nowrap bg-slate-50 px-2 py-1 rounded">${timeAgo(lastSeen)}</div>
+                        ${kickBtnHtml}
                     </div>
                 </li>`;
             });
 
-            // Listeners para botones kick
             document.querySelectorAll('.btn-kick').forEach(btn => {
                 btn.addEventListener('click', (e) => { e.stopPropagation(); kickUser(btn); });
             });
         };
 
+        // --- RENDERIZADO TABLA (Botones Activar/Bloquear) ---
+        const renderTable = () => {
+            const searchTerm = ui.searchInput.value.toLowerCase();
+            const filterStatus = ui.filterInput.value;
+            const list = state.users.filter(u => {
+                const matchesSearch = (u.Nombre+u.Apellido).toLowerCase().includes(searchTerm);
+                const matchesStatus = filterStatus === 'all' || u.Estado === filterStatus;
+                return matchesSearch && matchesStatus;
+            });
+            ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400">Sin resultados</td></tr>';
+            
+            list.forEach(u => {
+                // Aquí solo nos importa si está "Bloqueado" (Inactivo) o Permitido (Cualquier otro estado)
+                const isBlocked = u.Estado === 'Inactivo';
+                const isOffline = u.Estado === 'Desconectado' || u.Estado === 'KICK';
+                
+                let badgeClass = 'badge-active'; let badgeText = 'Permitido'; let badgeIcon = '<i class="fas fa-check mr-1.5"></i>';
+                let actionBtn = `<button class="btn btn-red text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Inactivo">Bloquear</button>`;
+
+                if (isBlocked) {
+                    badgeClass = 'badge-inactive'; badgeText = 'Bloqueado'; badgeIcon = '<i class="fas fa-ban mr-1.5"></i>';
+                    actionBtn = `<button class="btn btn-green text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Activo">Desbloquear</button>`;
+                } else if (isOffline) {
+                    badgeClass = 'badge-offline'; badgeText = 'Desconectado'; badgeIcon = '<i class="fas fa-power-off mr-1.5"></i>';
+                    // Si está desconectado, el botón sigue siendo "Bloquear" por si queremos banearlo mientras no está
+                    actionBtn = `<button class="btn btn-red text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Inactivo">Bloquear</button>`;
+                }
+
+                ui.tableBody.innerHTML += `
+                <tr class="bg-white hover:bg-slate-50 border-b cursor-pointer tr-user transition-colors group" data-id="${u['ID de Usuario']}">
+                    <td class="px-6 py-4 flex gap-3 font-medium text-slate-900 items-center">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 text-xs font-bold text-slate-500 flex items-center justify-center">${safe(u.Nombre[0])}${safe(u.Apellido[0])}</div>
+                        ${safe(u.Nombre)} ${safe(u.Apellido)}
+                    </td>
+                    <td class="px-6 py-4"><span class="badge ${badgeClass}">${badgeIcon}${badgeText}</span></td>
+                    <td class="px-6 py-4 font-bold text-yellow-600"><div class="flex items-center gap-1"><i class="fas fa-star text-xs text-yellow-400"></i>${u.Puntos||0}</div></td>
+                    <td class="px-6 py-4 text-center">${actionBtn}</td>
+                </tr>`;
+            });
+        };
+
+        const updateCounters = () => { const active = state.users.filter(u=>u.Estado!=='Inactivo').length; ui.counters.total.textContent = state.users.length; ui.counters.active.textContent = active; ui.counters.inactive.textContent = state.users.length - active; };
         const showToast = (msg, type = 'info') => {
             const t = document.createElement('div'); t.className = 'toast';
-            if (type === 'delete') {
-                 t.innerHTML = `<div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 flex-shrink-0 shadow-sm"><i class="fas fa-trash"></i></div><div><p class="font-bold text-sm text-slate-800">Usuario Eliminado</p><p class="text-xs text-slate-500">Se ha borrado del registro</p></div>`;
-            } else {
-                 t.innerHTML = `<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm"><i class="fas fa-wifi"></i></div><div><p class="font-bold text-sm text-slate-800">${safe(msg.Nombre)} ${safe(msg.Apellido)}</p><p class="text-xs text-slate-500">Conexión detectada</p></div>`;
-            }
-            ui.toastContainer.appendChild(t);
-            requestAnimationFrame(() => t.classList.add('show'));
-            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
+            if (type === 'delete') { t.innerHTML = `<div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 flex-shrink-0 shadow-sm"><i class="fas fa-trash"></i></div><div><p class="font-bold text-sm text-slate-800">Usuario Eliminado</p><p class="text-xs text-slate-500">Se ha borrado del registro</p></div>`; } 
+            else { t.innerHTML = `<div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm"><i class="fas fa-wifi"></i></div><div><p class="font-bold text-sm text-slate-800">${safe(msg.Nombre)} ${safe(msg.Apellido)}</p><p class="text-xs text-slate-500">Conexión detectada</p></div>`; }
+            ui.toastContainer.appendChild(t); requestAnimationFrame(() => t.classList.add('show')); setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
         };
 
-        // --- LÓGICA MODAL ---
-        const openModal = (user) => {
-            state.currentUser = user; state.isEditing = false; updateEditModeUI();
-            const m = ui.modal;
-            m.fullName.textContent = `${user.Nombre} ${user.Apellido}`; m.id.textContent = user['ID de Usuario'];
-            m.phone.value = user.Teléfono || 'No registrado'; m.section.value = user.Sección || 'General'; m.contract.value = user['Tipo de Contrato'] || 'No especificado';
-            m.points.textContent = user.Puntos || 0;
-            m.date.textContent = user['Día de Ingreso'] ? `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` : 'Desconocido';
-            
-            m.history.innerHTML = '';
-            if(user.Historial && user.Historial.length){
-                user.Historial.slice(0, 20).forEach(h => {
-                    const d = new Date(h);
-                    m.history.innerHTML += `<li class="px-4 py-3 flex justify-between items-center hover:bg-slate-50 border-b border-slate-50 last:border-0"><span class="text-slate-700 font-medium text-sm">${d.toLocaleDateString('es-CL', {day:'2-digit', month:'short'})}</span><span class="font-mono text-slate-400 text-xs bg-slate-100 px-2 py-1 rounded">${d.toLocaleTimeString('es-CL').slice(0,5)} hrs</span></li>`;
-                });
-            } else { m.history.innerHTML = '<li class="p-8 text-center text-slate-400 text-sm">Sin historial reciente</li>'; }
-            m.el.classList.remove('hidden', 'modal-closed'); m.el.classList.add('modal-open'); m.content.classList.remove('scale-95');
-        };
-
+        const saveUserChanges = async () => { const m = ui.modal, btn = m.saveBtn, originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true; const payload = { action: 'editUser', id: state.currentUser['ID de Usuario'], telefono: m.phone.value, seccion: m.section.value, contrato: m.contract.value }; try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) }); state.currentUser.Teléfono = payload.telefono; state.currentUser.Sección = payload.seccion; state.currentUser['Tipo de Contrato'] = payload.contrato; toggleEditMode(); renderTable(); } catch (e) { alert('Error: ' + e.message); } finally { btn.innerHTML = originalText; btn.disabled = false; } };
+        const updatePoints = async (amount) => { const user = state.currentUser; if(!user) return; const currentVal = parseInt(ui.modal.points.textContent); ui.modal.points.textContent = currentVal + amount; try { const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: user['ID de Usuario'], amount: amount }) }); const data = await res.json(); if(data.status === 'success') { user.Puntos = data.newTotal; renderTable(); } else throw new Error(); } catch (e) { ui.modal.points.textContent = currentVal; alert('Error al actualizar puntos'); } };
+        const toggleStatus = async (btn) => { const id = btn.dataset.id, status = btn.dataset.status, original = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status }) }); const u = state.users.find(x => x['ID de Usuario'] == id); if(u) u.Estado = status; renderTable(); updateCounters(); } catch(e) { btn.innerHTML = original; alert('Error conexión'); } };
+        const deleteUser = async () => { if(!state.currentUser) return; if(!confirm(`¿Estás seguro de eliminar a ${state.currentUser.Nombre}?`)) return; const btn = ui.modal.deleteBtn; btn.disabled = true; try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: state.currentUser['ID de Usuario'] }) }); state.users = state.users.filter(u => u['ID de Usuario'] !== state.currentUser['ID de Usuario']); closeModal(); renderTable(); updateCounters(); showToast(null, 'delete'); } catch(e) { alert('Error'); } finally { btn.disabled = false; } };
+        
+        const openModal = (user) => { state.currentUser = user; state.isEditing = false; updateEditModeUI(); const m = ui.modal; m.fullName.textContent = `${user.Nombre} ${user.Apellido}`; m.id.textContent = user['ID de Usuario']; m.phone.value = user.Teléfono || 'No registrado'; m.section.value = user.Sección || 'General'; m.contract.value = user['Tipo de Contrato'] || 'No especificado'; m.points.textContent = user.Puntos || 0; m.date.textContent = user['Día de Ingreso'] ? `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` : '-'; m.history.innerHTML = ''; if(user.Historial && user.Historial.length){ user.Historial.slice(0, 20).forEach(h => { const d = new Date(h); m.history.innerHTML += `<li class="px-4 py-3 flex justify-between items-center hover:bg-slate-50 border-b border-slate-50 last:border-0"><span class="text-slate-700 font-medium text-sm">${d.toLocaleDateString('es-CL', {day:'2-digit', month:'short'})}</span><span class="font-mono text-slate-400 text-xs bg-slate-100 px-2 py-1 rounded">${d.toLocaleTimeString('es-CL').slice(0,5)} hrs</span></li>`; }); } else { m.history.innerHTML = '<li class="p-8 text-center text-slate-400 text-sm">Sin historial</li>'; } m.el.classList.remove('hidden', 'modal-closed'); m.el.classList.add('modal-open'); m.content.classList.remove('scale-95'); };
         const closeModal = () => { ui.modal.el.classList.add('modal-closed'); ui.modal.content.classList.add('scale-95'); setTimeout(() => ui.modal.el.classList.add('hidden'), 200); state.currentUser = null; };
         const toggleEditMode = () => { state.isEditing = !state.isEditing; updateEditModeUI(); };
-        const updateEditModeUI = () => {
-            const m = ui.modal;
-            if (state.isEditing) {
-                m.container.classList.add('is-editing'); m.phone.disabled = false; m.section.disabled = false; m.contract.disabled = false;
-                m.saveBtn.classList.remove('hidden'); m.editBtn.innerHTML = '<i class="fas fa-times mr-1"></i> Cancelar'; m.editBtn.className = "bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm";
-            } else {
-                m.container.classList.remove('is-editing'); m.phone.disabled = true; m.section.disabled = true; m.contract.disabled = true; m.saveBtn.classList.add('hidden'); m.editBtn.innerHTML = '<i class="fas fa-pen mr-1.5"></i> Editar'; m.editBtn.className = "bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm";
-            }
-        };
+        const updateEditModeUI = () => { const m = ui.modal; if (state.isEditing) { m.container.classList.add('is-editing'); m.phone.disabled = false; m.section.disabled = false; m.contract.disabled = false; m.saveBtn.classList.remove('hidden'); m.editBtn.innerHTML = '<i class="fas fa-times mr-1"></i> Cancelar'; m.editBtn.className = "bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm"; } else { m.container.classList.remove('is-editing'); m.phone.disabled = true; m.section.disabled = true; m.contract.disabled = true; m.saveBtn.classList.add('hidden'); m.editBtn.innerHTML = '<i class="fas fa-pen mr-1.5"></i> Editar'; m.editBtn.className = "bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm"; } };
 
-        // --- ACCIONES ---
-        const saveUserChanges = async () => {
-            const m = ui.modal, btn = m.saveBtn, originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
-            const payload = { action: 'editUser', id: state.currentUser['ID de Usuario'], telefono: m.phone.value, seccion: m.section.value, contrato: m.contract.value };
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                state.currentUser.Teléfono = payload.telefono; state.currentUser.Sección = payload.seccion; state.currentUser['Tipo de Contrato'] = payload.contrato; 
-                toggleEditMode(); renderTable();
-                const t = document.createElement('div'); t.className = 'toast show';
-                t.innerHTML = `<div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fas fa-check"></i></div><p class="font-bold text-sm">Datos guardados</p>`;
-                ui.toastContainer.appendChild(t); setTimeout(()=>t.remove(), 3000);
-            } catch (e) { alert('Error: ' + e.message); } finally { btn.innerHTML = originalText; btn.disabled = false; }
-        };
-
-        const updatePoints = async (amount) => {
-            const user = state.currentUser; if(!user) return;
-            const currentVal = parseInt(ui.modal.points.textContent); ui.modal.points.textContent = currentVal + amount; 
-            try {
-                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: user['ID de Usuario'], amount: amount }) }); 
-                const data = await res.json();
-                if(data.status === 'success') { user.Puntos = data.newTotal; renderTable(); } else throw new Error();
-            } catch (e) { ui.modal.points.textContent = currentVal; alert('Error al actualizar puntos'); }
-        };
-
-        const toggleStatus = async (btn) => {
-            const id = btn.dataset.id, status = btn.dataset.status, original = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try { 
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status }) }); 
-                const u = state.users.find(x => x['ID de Usuario'] == id); if(u) u.Estado = status; 
-                renderTable(); updateCounters(); 
-            } catch(e) { btn.innerHTML = original; alert('Error conexión'); }
-        };
-
-        const deleteUser = async () => {
-            if(!state.currentUser) return;
-            if(!confirm("¿Estás seguro de eliminar este usuario?")) return;
-            const btn = ui.modal.deleteBtn; btn.disabled = true;
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: state.currentUser['ID de Usuario'] }) });
-                state.users = state.users.filter(u => u['ID de Usuario'] !== state.currentUser['ID de Usuario']);
-                closeModal(); renderTable(); updateCounters(); showToast(null, 'delete');
-            } catch(e) { alert('Error al eliminar'); } finally { btn.disabled = false; }
-        };
-
-        // --- DETECTOR DE CIERRE DE PESTAÑA ---
-        const notificarCierre = () => {
-            const data = new URLSearchParams(); data.append('action', 'logSessionEnd'); data.append('user', 'Administrador'); data.append('timestamp', new Date().toISOString());
-            navigator.sendBeacon(SCRIPT_URL, data);
-        };
+        const notificarCierre = () => { const data = new URLSearchParams(); data.append('action', 'logSessionEnd'); data.append('user', 'Admin'); data.append('timestamp', new Date().toISOString()); navigator.sendBeacon(SCRIPT_URL, data); };
         window.addEventListener('pagehide', notificarCierre);
 
-        // --- EVENT LISTENERS ---
         ui.searchInput.addEventListener('input', () => setTimeout(renderTable, 300));
         ui.filterInput.addEventListener('change', renderTable);
         ui.tableBody.addEventListener('click', e => { e.stopPropagation(); if(e.target.closest('.btn-status')) toggleStatus(e.target.closest('.btn-status')); else if(e.target.closest('.tr-user')) openModal(state.users.find(u => u['ID de Usuario'] == e.target.closest('.tr-user').dataset.id)); });
-        ui.modal.closeBtn.addEventListener('click', closeModal); 
-        ui.modal.editBtn.addEventListener('click', toggleEditMode); 
-        ui.modal.saveBtn.addEventListener('click', saveUserChanges);
-        ui.modal.deleteBtn.addEventListener('click', deleteUser);
+        ui.modal.closeBtn.addEventListener('click', closeModal); ui.modal.editBtn.addEventListener('click', toggleEditMode); ui.modal.saveBtn.addEventListener('click', saveUserChanges); ui.modal.deleteBtn.addEventListener('click', deleteUser);
         document.querySelectorAll('.point-btn').forEach(btn => btn.addEventListener('click', () => updatePoints(parseInt(btn.dataset.val))));
 
-        // --- INICIO ---
-        fetchData(); 
-        setInterval(fetchData, 10000);
+        fetchData(); setInterval(fetchData, 10000);
     });
     </script>
 </body>
