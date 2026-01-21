@@ -4,270 +4,539 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control de Usuarios</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .badge { display: inline-block; padding: 0.25em 0.6em; font-size: 75%; font-weight: 700; line-height: 1; text-align: center; border-radius: 0.375rem; }
-        .badge-active { color: #166534; background-color: #dcfce7; }
-        .badge-inactive { color: #991b1b; background-color: #fee2e2; }
-        .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; font-weight: 600; cursor: pointer; transition: background-color 0.2s; border: 1px solid transparent; }
-        .btn-green { background-color: #22c55e; color: white; border-color: #16a34a; }
-        .btn-green:hover { background-color: #16a34a; }
-        .btn-red { background-color: #ef4444; color: white; border-color: #dc2626; }
-        .btn-red:hover { background-color: #dc2626; }
-        .btn:disabled { background-color: #d1d5db; cursor: not-allowed; border-color: #9ca3af; }
-        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; }
-        .toast { display: flex; align-items: center; gap: 1rem; padding: 1rem; background-color: white; border-radius: 0.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); border-left: 4px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s ease-in-out; }
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        /* Badges & Botones */
+        .badge { display: inline-flex; align-items: center; padding: 0.25em 0.7em; font-size: 0.75rem; font-weight: 700; border-radius: 9999px; line-height: 1; }
+        .badge-active { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
+        .badge-inactive { color: #b91c1c; background-color: #fee2e2; border: 1px solid #fecaca; }
+        
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-green { background-color: #22c55e; color: white; box-shadow: 0 1px 2px 0 rgb(34 197 94 / 0.5); }
+        .btn-green:hover:not(:disabled) { background-color: #16a34a; }
+        .btn-red { background-color: #ef4444; color: white; box-shadow: 0 1px 2px 0 rgb(239 68 68 / 0.5); }
+        .btn-red:hover:not(:disabled) { background-color: #dc2626; }
+        .btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(50%); }
+
+        /* Scrollbar personalizado para listas */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Notificaciones Toast */
+        #toast-container { position: fixed; top: 1rem; right: 1rem; left: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        @media (min-width: 640px) { #toast-container { left: auto; width: 350px; } }
+        .toast { pointer-events: auto; display: flex; align-items: center; gap: 1rem; padding: 1rem; background-color: white; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); border-left: 5px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
-        /* --- Estilos para el Modal --- */
-        .modal-backdrop { transition: opacity 0.3s ease; }
-        .modal-content { transition: transform 0.3s ease, opacity 0.3s ease; }
+
+        /* Estilos del Modal */
+        #userDetailsModal { transition: opacity 0.2s ease-in-out; }
+        .modal-content { transition: transform 0.2s ease-in-out; }
+        .modal-open { opacity: 1; pointer-events: auto; }
+        .modal-closed { opacity: 0; pointer-events: none; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-3 md:p-8 text-slate-800 pb-20">
 
     <div id="toast-container"></div>
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-8">
-            <h1 class="text-3xl font-bold text-slate-800"><i class="fas fa-chart-line text-blue-600"></i> Panel de Control de Usuarios</h1>
-            <p class="text-slate-500 mt-1">Este panel se actualiza cada 15 segundos.</p>
+        <!-- Header -->
+        <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-blue-600"></i> Panel de Usuarios
+                </h1>
+                <p class="text-slate-500 text-sm mt-1">Gestión y monitoreo en tiempo real</p>
+            </div>
+            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200 w-fit">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <p class="text-xs font-medium text-slate-600" id="last-update-text">Conectando...</p>
+            </div>
         </header>
 
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md flex justify-around items-center">
-                <div class="text-center"><p class="text-sm font-medium text-slate-500">TOTAL</p><p id="total-users" class="text-3xl font-bold text-slate-800">0</p></div>
-                <div class="border-l h-12 border-slate-200"></div>
-                <div class="text-center"><p class="text-sm font-medium text-slate-500">ACTIVOS</p><p id="active-users" class="text-3xl font-bold text-green-600">0</p></div>
-                <div class="border-l h-12 border-slate-200"></div>
-                <div class="text-center"><p class="text-sm font-medium text-slate-500">INACTIVOS</p><p id="inactive-users" class="text-3xl font-bold text-red-600">0</p></div>
+        <!-- Tarjetas de Estadísticas -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-6">
+            <!-- Contadores -->
+            <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 grid grid-cols-3 divide-x divide-slate-100">
+                <div class="text-center px-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Total</p>
+                    <p id="total-users" class="text-2xl md:text-4xl font-bold text-slate-800 mt-1">0</p>
+                </div>
+                <div class="text-center px-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Activos</p>
+                    <p id="active-users" class="text-2xl md:text-4xl font-bold text-green-600 mt-1">0</p>
+                </div>
+                <div class="text-center px-2">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Inactivos</p>
+                    <p id="inactive-users" class="text-2xl md:text-4xl font-bold text-red-600 mt-1">0</p>
+                </div>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-md"><h2 class="text-lg font-bold text-slate-800 mb-4">Últimas 5 Conexiones</h2><ul id="recent-activity-list" class="space-y-4"><li id="recent-activity-placeholder" class="text-center text-slate-400 py-4">Cargando...</li></ul></div>
+            
+            <!-- Últimas conexiones -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full">
+                <h2 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide border-b pb-2">Actividad Reciente</h2>
+                <ul id="recent-activity-list" class="space-y-3 overflow-y-auto max-h-40 custom-scrollbar flex-1">
+                    <li class="text-center text-slate-400 py-4 text-xs italic">Cargando...</li>
+                </ul>
+            </div>
         </section>
 
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                <h2 class="text-xl font-bold text-slate-800">Usuarios Registrados</h2>
-                <div class="relative">
+        <!-- Tabla Principal -->
+        <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+                <h2 class="text-lg font-bold text-slate-800">Directorio de Socios</h2>
+                <div class="relative w-full sm:w-auto">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border rounded-lg w-full sm:w-64">
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre..." 
+                           class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-slate-50">
                 </div>
-                </div>
-            <div class="overflow-x-auto">
+            </div>
+            
+            <div class="overflow-x-auto rounded-lg border border-slate-100">
                 <table class="w-full text-sm text-left text-slate-500">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50/80 border-b border-slate-200">
                         <tr>
-                            <th scope="col" class="px-6 py-3">Nombre Completo</th>
-                            <th scope="col" class="px-6 py-3">Estado</th>
-                            <th scope="col" class="px-6 py-3">Última Conexión</th>
-                            <th scope="col" class="px-6 py-3 text-center">Acciones</th>
+                            <th class="px-6 py-4 font-semibold">Usuario</th>
+                            <th class="px-6 py-4 font-semibold">Estado</th>
+                            <th class="px-6 py-4 font-semibold">Último Ingreso</th>
+                            <th class="px-6 py-4 text-center font-semibold">Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="users-table-body">
-                       <tr><td colspan="4" class="text-center p-8 text-slate-400">Cargando datos...</td></tr>
+                    <tbody id="users-table-body" class="divide-y divide-slate-100">
+                       <tr><td colspan="4" class="text-center p-12 text-slate-400 animate-pulse">Cargando datos del servidor...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <div id="userDetailsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 hidden modal-backdrop opacity-0">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg modal-content transform scale-95 opacity-0">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="text-xl font-bold text-slate-800">Detalles del Usuario</h3>
-                <button id="closeModalBtn" class="text-slate-500 hover:text-slate-800 text-2xl">&times;</button>
+    <!-- Modal de Detalles -->
+    <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 modal-closed backdrop-blur-sm hidden" aria-hidden="true">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 opacity-0 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-start p-6 border-b border-slate-100 flex-shrink-0 bg-white z-10">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900" id="modal-nombre-completo">Cargando...</h3>
+                    <p class="text-sm text-slate-500">ID: <span id="modal-id" class="font-mono bg-slate-100 px-1 rounded text-slate-700">...</span></p>
+                </div>
+                <button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-                <div class="col-span-2"><p class="text-sm text-slate-500">ID de Usuario</p><p id="modal-id" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Nombre</p><p id="modal-nombre" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Apellido</p><p id="modal-apellido" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Teléfono</p><p id="modal-telefono" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Puntos</p><p id="modal-puntos" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Tipo de Contrato</p><p id="modal-contrato" class="font-semibold text-slate-700"></p></div>
-                <div><p class="text-sm text-slate-500">Sección</p><p id="modal-seccion" class="font-semibold text-slate-700"></p></div>
-                <div class="col-span-2"><p class="text-sm text-slate-500">Fecha de Ingreso Original</p><p id="modal-ingreso" class="font-semibold text-slate-700"></p></div>
+            
+            <!-- Modal Body (Con Scroll) -->
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <!-- Datos Personales -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Teléfono</p>
+                        <p id="modal-telefono" class="font-medium text-slate-800">-</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Puntos Acumulados</p>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-star text-yellow-400"></i>
+                            <p id="modal-puntos" class="font-bold text-slate-800">-</p>
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Tipo de Contrato</p>
+                        <p id="modal-contrato" class="font-medium text-slate-800 bg-blue-50 text-blue-700 px-2 py-0.5 rounded inline-block">-</p>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-slate-400 uppercase">Sección</p>
+                        <p id="modal-seccion" class="font-medium text-slate-800">-</p>
+                    </div>
+                    <div class="col-span-1 sm:col-span-2">
+                        <div class="flex items-center gap-2 text-slate-500 text-sm">
+                            <i class="far fa-calendar-alt"></i>
+                            <span>Fecha de Ingreso: <strong id="modal-ingreso" class="text-slate-700">-</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN NUEVA: HISTORIAL DE CONEXIONES -->
+                <div class="border-t border-slate-100 pt-5 mt-2">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                            <i class="fas fa-history text-slate-400"></i> Historial de Accesos
+                        </h4>
+                        <span id="modal-total-conexiones" class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">0 veces</span>
+                    </div>
+                    
+                    <div class="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
+                        <!-- Cabecera de la lista -->
+                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500 border-b border-slate-200">
+                            <span>Fecha</span>
+                            <span class="text-right">Hora</span>
+                        </div>
+                        <!-- Lista con scroll -->
+                        <ul id="modal-historial-lista" class="max-h-32 overflow-y-auto divide-y divide-slate-200/50 text-sm custom-scrollbar bg-white">
+                            <li class="px-4 py-3 text-center text-slate-400 italic text-xs">Cargando historial...</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURACIÓN Y ELEMENTOS DEL DOM ---
+        // --- CONFIGURACIÓN ---
+        // ¡RECUERDA! Actualiza esta URL si Google te dio una nueva al hacer "Nueva implementación"
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
-        const elements = {
-            totalUsers: document.getElementById('total-users'),
-            activeUsers: document.getElementById('active-users'),
-            inactiveUsers: document.getElementById('inactive-users'),
-            usersTableBody: document.getElementById('users-table-body'),
-            recentActivityList: document.getElementById('recent-activity-list'),
-            toastContainer: document.getElementById('toast-container'),
+        
+        // --- VARIABLES DE ESTADO ---
+        let state = {
+            users: [],
+            latestTimestamp: null,
+            isFetching: false
+        };
+
+        // --- REFERENCIAS AL DOM ---
+        const ui = {
+            counters: {
+                total: document.getElementById('total-users'),
+                active: document.getElementById('active-users'),
+                inactive: document.getElementById('inactive-users')
+            },
+            tableBody: document.getElementById('users-table-body'),
+            activityList: document.getElementById('recent-activity-list'),
             searchInput: document.getElementById('searchInput'),
-            // Modal
-            userDetailsModal: document.getElementById('userDetailsModal'),
-            closeModalBtn: document.getElementById('closeModalBtn'),
-            modalFields: {
-                id: document.getElementById('modal-id'),
-                nombre: document.getElementById('modal-nombre'),
-                apellido: document.getElementById('modal-apellido'),
-                telefono: document.getElementById('modal-telefono'),
-                puntos: document.getElementById('modal-puntos'),
-                contrato: document.getElementById('modal-contrato'),
-                seccion: document.getElementById('modal-seccion'),
-                ingreso: document.getElementById('modal-ingreso'),
+            toastContainer: document.getElementById('toast-container'),
+            statusText: document.getElementById('last-update-text'),
+            modal: {
+                el: document.getElementById('userDetailsModal'),
+                content: document.querySelector('#userDetailsModal .modal-content'),
+                closeBtn: document.getElementById('closeModalBtn'),
+                fields: {
+                    fullName: document.getElementById('modal-nombre-completo'),
+                    id: document.getElementById('modal-id'),
+                    phone: document.getElementById('modal-telefono'),
+                    points: document.getElementById('modal-puntos'),
+                    contract: document.getElementById('modal-contrato'),
+                    section: document.getElementById('modal-seccion'),
+                    date: document.getElementById('modal-ingreso')
+                },
+                historyList: document.getElementById('modal-historial-lista'),
+                totalConnections: document.getElementById('modal-total-conexiones')
             }
         };
+
+        // --- UTILIDADES ---
+        const safe = (str) => {
+            if (!str) return '';
+            return String(str).replace(/[&<>"']/g, m => ({'&': '&amp;','<': '&lt;','>': '&gt;','&quot;': '"',"'": '&#039;'}[m]));
+        };
+
+        const parseDate = (d) => {
+            if (!d) return null;
+            // Intentar formato ISO primero (nuevo script)
+            const iso = new Date(d);
+            if (!isNaN(iso.getTime())) return iso;
+            // Fallback para formato antiguo DD/MM/YYYY
+            const parts = d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}), (\d{1,2}):(\d{2}):(\d{2})/);
+            if (parts) return new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6]);
+            return null;
+        };
+
+        const timeAgo = (date) => {
+            if (!date) return '';
+            const seconds = Math.floor((new Date() - date) / 1000);
+            if (seconds < 60) return "ahora";
+            const min = Math.floor(seconds / 60);
+            if (min < 60) return `${min} min`;
+            const hr = Math.floor(min / 60);
+            if (hr < 24) return `${hr} h`;
+            return `${Math.floor(hr / 24)} d`;
+        };
+
+        // --- LÓGICA DE INTERFAZ ---
         
-        let latestKnownTimestamp = null;
-        let allValidUsers = []; // Guardaremos una copia de todos los usuarios aquí
+        // 1. Mostrar/Ocultar Modal
+        const toggleModal = (show, user = null) => {
+            const m = ui.modal;
+            if (show && user) {
+                // Rellenar datos básicos
+                m.fields.fullName.textContent = `${user.Nombre} ${user.Apellido}`;
+                m.fields.id.textContent = user['ID de Usuario'] || 'N/A';
+                m.fields.phone.textContent = user.Teléfono || 'No registrado';
+                m.fields.points.textContent = user.Puntos || '0';
+                m.fields.contract.textContent = user['Tipo de Contrato'] || 'General';
+                m.fields.section.textContent = user.Sección || 'General';
+                
+                // Formato de fecha ingreso
+                const ingresoDate = user['Día de Ingreso'] ? `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` : null;
+                m.fields.date.textContent = ingresoDate || 'N/A';
+                
+                // --- CARGAR HISTORIAL ---
+                m.historyList.innerHTML = ''; // Limpiar anterior
+                
+                if (user.Historial && Array.isArray(user.Historial) && user.Historial.length > 0) {
+                    m.totalConnections.textContent = `${user.Historial.length} veces`;
+                    
+                    // Renderizar los primeros 50 registros
+                    user.Historial.slice(0, 50).forEach(isoDate => {
+                        const dateObj = new Date(isoDate);
+                        const dayStr = dateObj.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+                        const timeStr = dateObj.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                        
+                        const li = document.createElement('li');
+                        li.className = 'grid grid-cols-2 px-4 py-2 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0';
+                        li.innerHTML = `
+                            <span class="text-slate-700 font-medium">${dayStr}</span>
+                            <span class="text-slate-500 text-right font-mono text-xs pt-0.5">${timeStr} hrs</span>
+                        `;
+                        m.historyList.appendChild(li);
+                    });
+                } else {
+                    m.totalConnections.textContent = "0 veces";
+                    m.historyList.innerHTML = `<li class="px-4 py-6 text-center text-slate-400 italic text-xs flex flex-col items-center gap-1"><i class="fas fa-info-circle"></i> Sin registros en el historial nuevo.</li>`;
+                }
 
-        // --- FUNCIONES AUXILIARES (fechas, toast) ---
-        function parseChileanDate(d) { if (!d) return null; const p = d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}), (\d{1,2}):(\d{2}):(\d{2})/); if (!p) return new Date(d); return new Date(p[3], p[2] - 1, p[1], p[4], p[5], p[6]); }
-        function formatTimeAgo(d) { const s = Math.floor((new Date() - d) / 1000); if (s < 60) return "hace un momento"; const m = Math.floor(s / 60); if (m < 60) return `hace ${m} min`; const h = Math.floor(m / 60); if (h < 24) return `hace ${h} hr`; return `hace ${Math.floor(h / 24)} días`; }
-        function formatFullDateTime(d) { if (!d) return 'N/A'; const dt = parseChileanDate(d); if (!dt) return 'Fecha inválida'; return `${dt.toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' })}, ${dt.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })} hrs.`; }
-        function showToast(u) { const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = `<div class="flex-shrink-0 text-blue-500"><i class="fas fa-wifi fa-lg"></i></div><div><p class="font-bold text-slate-800">${u.Nombre} ${u.Apellido}</p><p class="text-sm text-slate-500">Se conectó ahora</p></div>`; elements.toastContainer.appendChild(t); setTimeout(() => t.classList.add('show'), 100); setTimeout(() => { t.classList.remove('show'); t.addEventListener('transitionend', () => t.remove()); }, 5000); }
-
-        // --- FUNCIONES DEL MODAL (CORREGIDAS) ---
-        function showUserDetailsModal(user) {
-            elements.modalFields.id.textContent = user['ID de Usuario'] || 'N/A';
-            elements.modalFields.nombre.textContent = user.Nombre || 'N/A';
-            elements.modalFields.apellido.textContent = user.Apellido || 'N/A';
-            elements.modalFields.telefono.textContent = user.Teléfono || 'N/A';
-            elements.modalFields.puntos.textContent = user.Puntos || 'N/A';
-            elements.modalFields.contrato.textContent = user['Tipo de Contrato'] || 'N/A';
-            elements.modalFields.seccion.textContent = user.Sección || 'N/A';
-            elements.modalFields.ingreso.textContent = `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` || 'N/A';
-            
-            elements.userDetailsModal.classList.remove('hidden');
-            setTimeout(() => {
-                // CORRECCIÓN: Apuntamos al elemento del modal directamente para la opacidad del fondo.
-                elements.userDetailsModal.classList.add('opacity-100');
-                elements.userDetailsModal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100');
-            }, 10);
-        }
-
-        function hideUserDetailsModal() {
-            // CORRECCIÓN: Apuntamos al elemento del modal directamente para la opacidad del fondo.
-            elements.userDetailsModal.classList.remove('opacity-100');
-            elements.userDetailsModal.querySelector('.modal-content').classList.remove('scale-100', 'opacity-100');
-            setTimeout(() => elements.userDetailsModal.classList.add('hidden'), 300);
-        }
-
-        // --- FUNCIONES PRINCIPALES ---
-        async function updateUserStatus(userId, newStatus, button) { 
-            button.disabled = true; button.textContent = 'Cambiando...';
-            try {
-                const response = await fetch(SCRIPT_URL, { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'updateStatus', id: userId, status: newStatus }) });
-                if (!response.ok) throw new Error(`Error en la red: ${response.statusText}`);
-                const result = await response.json();
-                if (result.status === 'success') { console.log('Estado cambiado.'); updateDashboard(); } else { throw new Error(`Error del script: ${result.message}`); }
-            } catch (error) { console.error('Error al actualizar:', error); alert(`Error: ${error.message}`); updateDashboard(); }
-        }
-        
-        function renderUI() {
-            const searchTerm = elements.searchInput.value.toLowerCase();
-            const filteredUsers = allValidUsers.filter(user => 
-                `${user.Nombre} ${user.Apellido}`.toLowerCase().includes(searchTerm)
-            );
-            
-            elements.usersTableBody.innerHTML = '';
-            if (filteredUsers.length > 0) {
-                filteredUsers.forEach(user => {
-                    const isInactive = user.Estado && user.Estado.toLowerCase() === 'inactivo';
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b hover:bg-slate-100 cursor-pointer';
-                    row.dataset.userId = user['ID de Usuario'];
-                    row.innerHTML = `
-                        <td class="px-6 py-4 font-medium text-slate-900">${user.Nombre} ${user.Apellido}</td>
-                        <td class="px-6 py-4">${isInactive ? `<span class="badge badge-inactive">Inactivo</span>` : `<span class="badge badge-active">Activo</span>`}</td>
-                        <td class="px-6 py-4">${formatFullDateTime(user.Timestamp)}</td>
-                        <td class="px-6 py-4 text-center">
-                           ${isInactive ? `<button class="btn btn-green status-btn" data-id="${user['ID de Usuario']}" data-status="Activo">Activar</button>` : `<button class="btn btn-red status-btn" data-id="${user['ID de Usuario']}" data-status="Inactivo">Desactivar</button>`}
-                        </td>
-                    `;
-                    elements.usersTableBody.appendChild(row);
+                // Mostrar con animación
+                m.el.classList.remove('hidden', 'modal-closed');
+                m.el.classList.add('modal-open');
+                requestAnimationFrame(() => {
+                    m.content.classList.remove('scale-95', 'opacity-0');
+                    m.content.classList.add('scale-100', 'opacity-100');
                 });
             } else {
-                elements.usersTableBody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-slate-400">No se encontraron usuarios.</td></tr>';
+                // Ocultar
+                m.content.classList.remove('scale-100', 'opacity-100');
+                m.content.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    m.el.classList.remove('modal-open');
+                    m.el.classList.add('modal-closed');
+                    setTimeout(() => m.el.classList.add('hidden'), 200);
+                }, 200);
             }
-        }
+        };
 
-        async function updateDashboard() {
-            try {
-                const response = await fetch(SCRIPT_URL);
-                if (!response.ok) throw new Error(`Error en la solicitud: ${response.statusText}`);
-                const fetchedUsers = await response.json();
-                allValidUsers = fetchedUsers.filter(user => user && user["ID de Usuario"] && user.Timestamp);
+        // 2. Toast Notification
+        const showToast = (user) => {
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerHTML = `
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-wifi"></i></div>
+                <div><p class="font-bold text-sm text-slate-900">${safe(user.Nombre)} ${safe(user.Apellido)}</p><p class="text-xs text-slate-500">Conectado recientemente</p></div>
+            `;
+            ui.toastContainer.appendChild(div);
+            requestAnimationFrame(() => div.classList.add('show'));
+            setTimeout(() => {
+                div.classList.remove('show');
+                div.addEventListener('transitionend', () => div.remove());
+            }, 4000);
+        };
 
-                if (allValidUsers.length === 0) { 
-                    elements.usersTableBody.innerHTML = '<tr><td colspan="4" class="text-center p-8 text-slate-400">No hay usuarios registrados.</td></tr>';
-                    elements.recentActivityList.innerHTML = '<li class="text-center text-slate-400 py-4">No hay actividad para mostrar.</li>';
-                    return; 
-                }
+        // 3. Renderizar Tabla Principal
+        const renderTable = () => {
+            const term = ui.searchInput.value.toLowerCase();
+            const filtered = state.users.filter(u => 
+                (u.Nombre && u.Nombre.toLowerCase().includes(term)) || 
+                (u.Apellido && u.Apellido.toLowerCase().includes(term))
+            );
 
-                const sortedByTime = [...allValidUsers].sort((a, b) => parseChileanDate(b.Timestamp) - parseChileanDate(a.Timestamp));
-                const latestUser = sortedByTime[0];
+            ui.tableBody.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                ui.tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-slate-400">No se encontraron usuarios.</td></tr>`;
+                return;
+            }
 
-                if (latestKnownTimestamp === null) {
-                    latestKnownTimestamp = latestUser.Timestamp;
-                } else if (latestUser.Timestamp !== latestKnownTimestamp) {
-                    showToast(latestUser);
-                    latestKnownTimestamp = latestUser.Timestamp;
-                }
+            const fragment = document.createDocumentFragment();
+            filtered.forEach(u => {
+                const isActive = u.Estado && u.Estado.toLowerCase() === 'activo';
+                const date = parseDate(u.Timestamp);
+                const dateStr = date ? date.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'}) : '--:--';
                 
-                elements.totalUsers.textContent = allValidUsers.length;
-                elements.activeUsers.textContent = allValidUsers.filter(u => u.Estado && u.Estado.toLowerCase() === 'activo').length;
-                elements.inactiveUsers.textContent = allValidUsers.length - parseInt(elements.activeUsers.textContent);
+                const tr = document.createElement('tr');
+                tr.className = 'bg-white hover:bg-slate-50 transition-colors border-b cursor-pointer group';
+                tr.onclick = () => toggleModal(true, u);
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors flex items-center justify-center text-xs text-slate-500 font-bold">
+                            ${safe(u.Nombre.charAt(0))}${safe(u.Apellido.charAt(0))}
+                        </div>
+                        ${safe(u.Nombre)} ${safe(u.Apellido)}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">
+                            ${isActive ? '<i class="fas fa-check mr-1.5"></i>Activo' : '<i class="fas fa-times mr-1.5"></i>Inactivo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-xs text-slate-500 font-mono">
+                        <span class="bg-slate-100 px-2 py-1 rounded">Hoy ${dateStr}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="btn ${isActive ? 'btn-red' : 'btn-green'} text-xs action-btn shadow-sm" data-id="${u['ID de Usuario']}" data-status="${isActive ? 'Inactivo' : 'Activo'}">
+                            ${isActive ? 'Desactivar' : 'Activar'}
+                        </button>
+                    </td>
+                `;
+                fragment.appendChild(tr);
+            });
+            ui.tableBody.appendChild(fragment);
+        };
 
-                elements.recentActivityList.innerHTML = '';
-                sortedByTime.slice(0, 5).forEach(user => {
+        // 4. API: Cambiar Estado
+        const changeStatus = async (btn) => {
+            const id = btn.dataset.id;
+            const status = btn.dataset.status;
+            
+            // UI Optimista
+            const originalContent = btn.innerHTML;
+            const originalClass = btn.className;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    redirect: 'follow',
+                    headers: {'Content-Type': 'text/plain;charset=utf-8'},
+                    body: JSON.stringify({ action: 'updateStatus', id: id, status: status })
+                });
+                const data = await res.json();
+                
+                if (data.status === 'success') {
+                    // Actualizar estado local
+                    const user = state.users.find(u => u['ID de Usuario'] == id);
+                    if (user) user.Estado = status;
+                    renderTable();
+                    updateCounters();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                alert('No se pudo actualizar. Verifica tu conexión.');
+                console.error(err);
+                // Revertir
+                btn.innerHTML = originalContent;
+                btn.className = originalClass;
+                btn.disabled = false;
+            }
+        };
+
+        // 5. Contadores
+        const updateCounters = () => {
+            const active = state.users.filter(u => u.Estado === 'Activo').length;
+            ui.counters.total.textContent = state.users.length;
+            ui.counters.active.textContent = active;
+            ui.counters.inactive.textContent = state.users.length - active;
+        };
+
+        // 6. API: Obtener Datos
+        const fetchData = async () => {
+            if (state.isFetching) return;
+            state.isFetching = true;
+            ui.statusText.textContent = 'Actualizando...';
+            
+            try {
+                const res = await fetch(SCRIPT_URL);
+                if (!res.ok) throw new Error('Error de red');
+                const data = await res.json();
+                
+                // Ordenar: Más recientes primero
+                state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
+                
+                updateCounters();
+
+                // Actividad Reciente (Sidebar)
+                ui.activityList.innerHTML = '';
+                state.users.slice(0, 6).forEach(u => {
                     const li = document.createElement('li');
-                    li.className = 'flex items-center gap-3';
-                    li.innerHTML = `<div class="flex-shrink-0 w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center"><i class="fas fa-user text-slate-500"></i></div><div><p class="font-bold text-slate-800">${user.Nombre} ${user.Apellido}</p><p class="text-xs text-slate-500">${formatTimeAgo(parseChileanDate(user.Timestamp))}</p></div><div class="ml-auto">${user.Estado && user.Estado.toLowerCase() === 'inactivo' ? `<span class="badge badge-inactive">Inactivo</span>` : `<span class="badge badge-active">Activo</span>`}</div>`;
-                    elements.recentActivityList.appendChild(li);
+                    li.className = 'flex items-center gap-3 p-2 rounded hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0';
+                    li.innerHTML = `
+                        <div class="text-xs text-slate-400 font-mono w-14 text-right">${timeAgo(parseDate(u.Timestamp))}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-sm text-slate-700 truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
+                        </div>
+                        <div class="w-2 h-2 rounded-full flex-shrink-0 ${u.Estado === 'Activo' ? 'bg-green-500' : 'bg-red-400'}"></div>
+                    `;
+                    ui.activityList.appendChild(li);
                 });
 
-                renderUI();
+                // Toast para nuevo usuario
+                if (state.users.length > 0) {
+                    const newest = state.users[0];
+                    if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp) {
+                        showToast(newest);
+                    }
+                    state.latestTimestamp = newest.Timestamp;
+                }
 
-            } catch (error) {
-                console.error("Error al cargar datos:", error);
+                // Renderizar tabla (solo si no se está buscando)
+                if (document.activeElement !== ui.searchInput) renderTable();
+                
+                const now = new Date();
+                ui.statusText.textContent = `Actualizado ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+                ui.statusText.className = "text-xs font-medium text-slate-600";
+
+            } catch (err) {
+                console.error(err);
+                ui.statusText.textContent = 'Sin conexión';
+                ui.statusText.className = "text-xs font-bold text-red-500";
+                
+                // Aviso de CORS (para móviles)
+                if (window.location.protocol === 'content:' || window.location.protocol === 'file:') {
+                    ui.tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-red-600 bg-red-50 rounded-lg">
+                            <i class="fas fa-wifi fa-2x mb-2"></i><br>
+                            <strong>Modo Offline Detectado</strong><br>
+                            Sube este archivo a un servidor (Tiiny.host) para que funcione.
+                        </td>
+                    </tr>`;
+                }
+            } finally {
+                state.isFetching = false;
             }
-        }
+        };
 
-        // --- EVENT LISTENERS ---
-        elements.searchInput.addEventListener('input', renderUI);
-
-        elements.usersTableBody.addEventListener('click', (event) => {
-            const row = event.target.closest('tr');
-            const button = event.target.closest('.status-btn');
-
-            if (button) {
-                const userId = button.dataset.id;
-                const newStatus = button.dataset.status;
-                if (confirm(`¿Seguro que quieres cambiar el estado a "${newStatus}"?`)) {
-                    updateUserStatus(userId, newStatus, button);
-                }
-            } else if (row && row.dataset.userId) {
-                const userId = row.dataset.userId;
-                const user = allValidUsers.find(u => u['ID de Usuario'] == userId);
-                if (user) {
-                    showUserDetailsModal(user);
-                }
+        // --- EVENTOS ---
+        
+        // Clics en la tabla (Botones "Activar/Desactivar")
+        ui.tableBody.addEventListener('click', (e) => {
+            e.stopPropagation(); // Evitar abrir modal
+            const btn = e.target.closest('.action-btn');
+            if (btn) {
+                e.preventDefault();
+                changeStatus(btn);
             }
         });
 
-        elements.closeModalBtn.addEventListener('click', hideUserDetailsModal);
-        elements.userDetailsModal.addEventListener('click', (event) => {
-            if (event.target === elements.userDetailsModal) {
-                hideUserDetailsModal();
-            }
+        // Búsqueda
+        let debounce;
+        ui.searchInput.addEventListener('input', () => {
+            clearTimeout(debounce);
+            debounce = setTimeout(renderTable, 300);
         });
 
-        // --- EJECUCIÓN INICIAL ---
-        updateDashboard();
-        setInterval(updateDashboard, 15000);
+        // Modal
+        ui.modal.closeBtn.addEventListener('click', () => toggleModal(false));
+        ui.modal.el.addEventListener('click', (e) => {
+            if (e.target === ui.modal.el) toggleModal(false);
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleModal(false);
+        });
+
+        // --- INICIALIZACIÓN ---
+        fetchData();
+        setInterval(fetchData, 15000); // Actualizar cada 15 segundos
     });
-</script>
-
-
+    </script>
 </body>
 </html>
