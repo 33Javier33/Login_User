@@ -3,43 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control de Usuarios</title>
-    <!-- Tailwind CSS -->
+    <title>Panel de Gestión de Usuarios</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* Badges & Botones */
+        /* Badges y Botones */
         .badge { display: inline-flex; align-items: center; padding: 0.25em 0.7em; font-size: 0.75rem; font-weight: 700; border-radius: 9999px; line-height: 1; }
         .badge-active { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
         .badge-inactive { color: #b91c1c; background-color: #fee2e2; border: 1px solid #fecaca; }
         
-        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 0.5rem; }
-        .btn-green { background-color: #22c55e; color: white; box-shadow: 0 1px 2px 0 rgb(34 197 94 / 0.5); }
-        .btn-green:hover:not(:disabled) { background-color: #16a34a; }
-        .btn-red { background-color: #ef4444; color: white; box-shadow: 0 1px 2px 0 rgb(239 68 68 / 0.5); }
-        .btn-red:hover:not(:disabled) { background-color: #dc2626; }
-        .btn:disabled { opacity: 0.7; cursor: not-allowed; filter: grayscale(50%); }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; }
+        .btn-green { background-color: #22c55e; color: white; }
+        .btn-red { background-color: #ef4444; color: white; }
+        
+        /* Inputs Editables */
+        .editable-input { background: transparent; border: 1px solid transparent; width: 100%; padding: 4px 0; font-weight: 600; color: #334155; transition: all 0.2s; }
+        .editable-input:disabled { background: transparent; opacity: 1; cursor: default; border-bottom: 1px dashed #e2e8f0; }
+        .is-editing .editable-input { background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; }
+        .is-editing .editable-input:focus { border-color: #3b82f6; outline: 2px solid #bfdbfe; }
 
-        /* Scrollbar personalizado para listas */
+        /* Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Notificaciones Toast */
-        #toast-container { position: fixed; top: 1rem; right: 1rem; left: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
-        @media (min-width: 640px) { #toast-container { left: auto; width: 350px; } }
-        .toast { pointer-events: auto; display: flex; align-items: center; gap: 1rem; padding: 1rem; background-color: white; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1); border-left: 5px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.show { transform: translateX(0); }
-
-        /* Estilos del Modal */
-        #userDetailsModal { transition: opacity 0.2s ease-in-out; }
-        .modal-content { transition: transform 0.2s ease-in-out; }
+        
+        /* Modal Transitions */
         .modal-open { opacity: 1; pointer-events: auto; }
         .modal-closed { opacity: 0; pointer-events: none; }
+        
+        /* Toast Notification */
+        #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast { pointer-events: auto; background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 1rem; align-items: center; }
+        .toast.show { transform: translateX(0); }
     </style>
 </head>
 <body class="p-3 md:p-8 text-slate-800 pb-20">
@@ -51,140 +47,140 @@
         <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fas fa-chart-line text-blue-600"></i> Panel de Usuarios
+                    <i class="fas fa-users-cog text-blue-600"></i> Gestión de Socios
                 </h1>
-                <p class="text-slate-500 text-sm mt-1">Gestión y monitoreo en tiempo real</p>
+                <p class="text-slate-500 text-sm mt-1">Panel de Administración en Tiempo Real</p>
             </div>
-            <div class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200 w-fit">
+            <!-- Indicador de Estado -->
+            <div id="status-badge" class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200 w-fit transition-colors duration-300">
                 <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  <span id="ping-animate" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                  <span id="ping-static" class="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
                 </span>
                 <p class="text-xs font-medium text-slate-600" id="last-update-text">Conectando...</p>
             </div>
         </header>
 
-        <!-- Tarjetas de Estadísticas -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-6">
-            <!-- Contadores -->
+        <!-- Stats -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 grid grid-cols-3 divide-x divide-slate-100">
-                <div class="text-center px-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Total</p>
-                    <p id="total-users" class="text-2xl md:text-4xl font-bold text-slate-800 mt-1">0</p>
-                </div>
-                <div class="text-center px-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Activos</p>
-                    <p id="active-users" class="text-2xl md:text-4xl font-bold text-green-600 mt-1">0</p>
-                </div>
-                <div class="text-center px-2">
-                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wide">Inactivos</p>
-                    <p id="inactive-users" class="text-2xl md:text-4xl font-bold text-red-600 mt-1">0</p>
-                </div>
+                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</p><p id="total-users" class="text-3xl font-bold text-slate-800 mt-1">0</p></div>
+                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Activos</p><p id="active-users" class="text-3xl font-bold text-green-600 mt-1">0</p></div>
+                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactivos</p><p id="inactive-users" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
             </div>
-            
-            <!-- Últimas conexiones -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full">
-                <h2 class="text-sm font-bold text-slate-800 mb-3 uppercase tracking-wide border-b pb-2">Actividad Reciente</h2>
+                <h2 class="text-sm font-bold text-slate-800 mb-3 uppercase border-b pb-2 tracking-wide">Última Actividad</h2>
                 <ul id="recent-activity-list" class="space-y-3 overflow-y-auto max-h-40 custom-scrollbar flex-1">
-                    <li class="text-center text-slate-400 py-4 text-xs italic">Cargando...</li>
+                    <li class="text-center text-slate-400 text-xs py-4">Esperando datos...</li>
                 </ul>
             </div>
         </section>
 
-        <!-- Tabla Principal -->
+        <!-- Tabla -->
         <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <h2 class="text-lg font-bold text-slate-800">Directorio de Socios</h2>
                 <div class="relative w-full sm:w-auto">
                     <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por nombre..." 
-                           class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm bg-slate-50">
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all">
                 </div>
             </div>
-            
             <div class="overflow-x-auto rounded-lg border border-slate-100">
                 <table class="w-full text-sm text-left text-slate-500">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50/80 border-b border-slate-200">
+                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b">
                         <tr>
                             <th class="px-6 py-4 font-semibold">Usuario</th>
                             <th class="px-6 py-4 font-semibold">Estado</th>
-                            <th class="px-6 py-4 font-semibold">Último Ingreso</th>
+                            <th class="px-6 py-4 font-semibold">Puntos</th>
                             <th class="px-6 py-4 text-center font-semibold">Acción</th>
                         </tr>
                     </thead>
                     <tbody id="users-table-body" class="divide-y divide-slate-100">
-                       <tr><td colspan="4" class="text-center p-12 text-slate-400 animate-pulse">Cargando datos del servidor...</td></tr>
+                        <tr><td colspan="4" class="p-12 text-center text-slate-400 animate-pulse">Conectando con la base de datos...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Detalles -->
-    <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 modal-closed backdrop-blur-sm hidden" aria-hidden="true">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 opacity-0 duration-300 max-h-[90vh] overflow-hidden flex flex-col">
+    <!-- MODAL -->
+    <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 modal-closed backdrop-blur-sm hidden transition-opacity duration-200">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 transition-transform duration-200 flex flex-col max-h-[90vh]">
             <!-- Modal Header -->
-            <div class="flex justify-between items-start p-6 border-b border-slate-100 flex-shrink-0 bg-white z-10">
+            <div class="flex justify-between items-start p-6 border-b border-slate-100 bg-white rounded-t-2xl z-10 flex-shrink-0">
                 <div>
-                    <h3 class="text-xl font-bold text-slate-900" id="modal-nombre-completo">Cargando...</h3>
-                    <p class="text-sm text-slate-500">ID: <span id="modal-id" class="font-mono bg-slate-100 px-1 rounded text-slate-700">...</span></p>
+                    <h3 class="text-xl font-bold text-slate-900 leading-tight" id="modal-nombre-completo">...</h3>
+                    <p class="text-sm text-slate-500 mt-1">ID: <span id="modal-id" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">...</span></p>
                 </div>
-                <button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="flex gap-2">
+                    <button id="toggleEditBtn" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm">
+                        <i class="fas fa-pen mr-1.5"></i> Editar
+                    </button>
+                    <button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
             </div>
             
-            <!-- Modal Body (Con Scroll) -->
-            <div class="p-6 overflow-y-auto custom-scrollbar">
-                <!-- Datos Personales -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Teléfono</p>
-                        <p id="modal-telefono" class="font-medium text-slate-800">-</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Puntos Acumulados</p>
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto custom-scrollbar flex-1" id="modal-form-container">
+                <!-- Puntos -->
+                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-100 mb-6 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p class="text-[10px] font-bold text-yellow-600 uppercase mb-1 tracking-wider">Puntos Acumulados</p>
                         <div class="flex items-center gap-2">
-                            <i class="fas fa-star text-yellow-400"></i>
-                            <p id="modal-puntos" class="font-bold text-slate-800">-</p>
+                            <i class="fas fa-trophy text-yellow-500 text-lg"></i>
+                            <p id="modal-puntos-display" class="text-3xl font-bold text-slate-800">0</p>
                         </div>
                     </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Tipo de Contrato</p>
-                        <p id="modal-contrato" class="font-medium text-slate-800 bg-blue-50 text-blue-700 px-2 py-0.5 rounded inline-block">-</p>
-                    </div>
-                    <div class="space-y-1">
-                        <p class="text-xs font-bold text-slate-400 uppercase">Sección</p>
-                        <p id="modal-seccion" class="font-medium text-slate-800">-</p>
-                    </div>
-                    <div class="col-span-1 sm:col-span-2">
-                        <div class="flex items-center gap-2 text-slate-500 text-sm">
-                            <i class="far fa-calendar-alt"></i>
-                            <span>Fecha de Ingreso: <strong id="modal-ingreso" class="text-slate-700">-</strong></span>
-                        </div>
+                    <div class="flex gap-1.5">
+                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-10">-10</button>
+                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-1">-1</button>
+                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="1">+1</button>
+                        <button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="10">+10</button>
                     </div>
                 </div>
 
-                <!-- SECCIÓN NUEVA: HISTORIAL DE CONEXIONES -->
-                <div class="border-t border-slate-100 pt-5 mt-2">
-                    <div class="flex items-center justify-between mb-3">
-                        <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
-                            <i class="fas fa-history text-slate-400"></i> Historial de Accesos
-                        </h4>
-                        <span id="modal-total-conexiones" class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-full">0 veces</span>
+                <!-- Campos -->
+                <div class="grid grid-cols-1 gap-5 mb-6">
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-phone-alt"></i> Teléfono</label>
+                        <input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar">
                     </div>
-                    
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-layer-group"></i> Sección</label>
+                        <input type="text" id="modal-seccion" class="editable-input" disabled placeholder="General">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-file-contract"></i> Contrato</label>
+                        <input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado">
+                    </div>
+                    <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                        <i class="far fa-calendar-alt text-slate-400"></i>
+                        <p class="text-xs text-slate-500">Fecha de Ingreso: <span id="modal-ingreso" class="text-slate-700 font-bold ml-1">-</span></p>
+                    </div>
+                </div>
+
+                <!-- Botón Guardar -->
+                <button id="saveChangesBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 hidden transform transition-all active:scale-95 mb-6">
+                    <i class="fas fa-save mr-2"></i> Guardar Cambios
+                </button>
+
+                <!-- Historial -->
+                <div class="border-t border-slate-100 pt-5">
+                    <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <i class="fas fa-history text-slate-400"></i> Historial de Accesos
+                    </h4>
                     <div class="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-                        <!-- Cabecera de la lista -->
-                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-xs font-bold text-slate-500 border-b border-slate-200">
+                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
                             <span>Fecha</span>
                             <span class="text-right">Hora</span>
                         </div>
-                        <!-- Lista con scroll -->
-                        <ul id="modal-historial-lista" class="max-h-32 overflow-y-auto divide-y divide-slate-200/50 text-sm custom-scrollbar bg-white">
-                            <li class="px-4 py-3 text-center text-slate-400 italic text-xs">Cargando historial...</li>
+                        <ul id="modal-historial-lista" class="divide-y divide-slate-100 text-sm bg-white max-h-40 overflow-y-auto custom-scrollbar">
+                            <li class="p-4 text-center text-slate-400 italic text-xs">Cargando...</li>
                         </ul>
                     </div>
+                    <p class="text-center text-xs text-slate-400 mt-2 italic">Mostrando últimos 20 registros</p>
                 </div>
             </div>
         </div>
@@ -193,349 +189,271 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         // --- CONFIGURACIÓN ---
-        // ¡RECUERDA! Actualiza esta URL si Google te dio una nueva al hacer "Nueva implementación"
+        // Pega aquí la URL de tu script .gs (versión "Nueva Implementación")
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
-        
-        // --- VARIABLES DE ESTADO ---
-        let state = {
-            users: [],
-            latestTimestamp: null,
-            isFetching: false
-        };
 
-        // --- REFERENCIAS AL DOM ---
+        // --- ESTADO Y UI ---
+        let state = { users: [], latestTimestamp: null, isFetching: false, currentUser: null, isEditing: false };
+
         const ui = {
-            counters: {
-                total: document.getElementById('total-users'),
-                active: document.getElementById('active-users'),
-                inactive: document.getElementById('inactive-users')
-            },
             tableBody: document.getElementById('users-table-body'),
-            activityList: document.getElementById('recent-activity-list'),
-            searchInput: document.getElementById('searchInput'),
-            toastContainer: document.getElementById('toast-container'),
-            statusText: document.getElementById('last-update-text'),
             modal: {
-                el: document.getElementById('userDetailsModal'),
-                content: document.querySelector('#userDetailsModal .modal-content'),
-                closeBtn: document.getElementById('closeModalBtn'),
-                fields: {
-                    fullName: document.getElementById('modal-nombre-completo'),
-                    id: document.getElementById('modal-id'),
-                    phone: document.getElementById('modal-telefono'),
-                    points: document.getElementById('modal-puntos'),
-                    contract: document.getElementById('modal-contrato'),
-                    section: document.getElementById('modal-seccion'),
-                    date: document.getElementById('modal-ingreso')
-                },
-                historyList: document.getElementById('modal-historial-lista'),
-                totalConnections: document.getElementById('modal-total-conexiones')
-            }
+                el: document.getElementById('userDetailsModal'), content: document.querySelector('#userDetailsModal .modal-content'), container: document.getElementById('modal-form-container'),
+                fullName: document.getElementById('modal-nombre-completo'), id: document.getElementById('modal-id'), phone: document.getElementById('modal-telefono'),
+                section: document.getElementById('modal-seccion'), contract: document.getElementById('modal-contrato'), date: document.getElementById('modal-ingreso'),
+                points: document.getElementById('modal-puntos-display'), history: document.getElementById('modal-historial-lista'),
+                editBtn: document.getElementById('toggleEditBtn'), saveBtn: document.getElementById('saveChangesBtn'), closeBtn: document.getElementById('closeModalBtn')
+            },
+            searchInput: document.getElementById('searchInput'),
+            counters: { total: document.getElementById('total-users'), active: document.getElementById('active-users'), inactive: document.getElementById('inactive-users') },
+            activityList: document.getElementById('recent-activity-list'), toastContainer: document.getElementById('toast-container'), 
+            statusText: document.getElementById('last-update-text'), statusBadge: document.getElementById('status-badge'),
+            pingAnimate: document.getElementById('ping-animate'), pingStatic: document.getElementById('ping-static')
         };
 
         // --- UTILIDADES ---
-        const safe = (str) => {
-            if (!str) return '';
-            return String(str).replace(/[&<>"']/g, m => ({'&': '&amp;','<': '&lt;','>': '&gt;','&quot;': '"',"'": '&#039;'}[m]));
-        };
-
-        const parseDate = (d) => {
-            if (!d) return null;
-            // Intentar formato ISO primero (nuevo script)
-            const iso = new Date(d);
-            if (!isNaN(iso.getTime())) return iso;
-            // Fallback para formato antiguo DD/MM/YYYY
-            const parts = d.match(/(\d{1,2})\/(\d{1,2})\/(\d{4}), (\d{1,2}):(\d{2}):(\d{2})/);
-            if (parts) return new Date(parts[3], parts[2] - 1, parts[1], parts[4], parts[5], parts[6]);
-            return null;
-        };
-
-        const timeAgo = (date) => {
-            if (!date) return '';
-            const seconds = Math.floor((new Date() - date) / 1000);
-            if (seconds < 60) return "ahora";
-            const min = Math.floor(seconds / 60);
-            if (min < 60) return `${min} min`;
-            const hr = Math.floor(min / 60);
-            if (hr < 24) return `${hr} h`;
-            return `${Math.floor(hr / 24)} d`;
-        };
-
-        // --- LÓGICA DE INTERFAZ ---
+        const safe = str => str ? String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])) : '';
+        const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
+        const timeAgo = d => { if(!d)return'';const s=Math.floor((new Date()-d)/1000);return s<60?'ahora':s<3600?`${Math.floor(s/60)} min`:`${Math.floor(s/3600)} h`; };
         
-        // 1. Mostrar/Ocultar Modal
-        const toggleModal = (show, user = null) => {
-            const m = ui.modal;
-            if (show && user) {
-                // Rellenar datos básicos
-                m.fields.fullName.textContent = `${user.Nombre} ${user.Apellido}`;
-                m.fields.id.textContent = user['ID de Usuario'] || 'N/A';
-                m.fields.phone.textContent = user.Teléfono || 'No registrado';
-                m.fields.points.textContent = user.Puntos || '0';
-                m.fields.contract.textContent = user['Tipo de Contrato'] || 'General';
-                m.fields.section.textContent = user.Sección || 'General';
-                
-                // Formato de fecha ingreso
-                const ingresoDate = user['Día de Ingreso'] ? `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` : null;
-                m.fields.date.textContent = ingresoDate || 'N/A';
-                
-                // --- CARGAR HISTORIAL ---
-                m.historyList.innerHTML = ''; // Limpiar anterior
-                
-                if (user.Historial && Array.isArray(user.Historial) && user.Historial.length > 0) {
-                    m.totalConnections.textContent = `${user.Historial.length} veces`;
-                    
-                    // Renderizar los primeros 50 registros
-                    user.Historial.slice(0, 50).forEach(isoDate => {
-                        const dateObj = new Date(isoDate);
-                        const dayStr = dateObj.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
-                        const timeStr = dateObj.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
-                        
-                        const li = document.createElement('li');
-                        li.className = 'grid grid-cols-2 px-4 py-2 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0';
-                        li.innerHTML = `
-                            <span class="text-slate-700 font-medium">${dayStr}</span>
-                            <span class="text-slate-500 text-right font-mono text-xs pt-0.5">${timeStr} hrs</span>
-                        `;
-                        m.historyList.appendChild(li);
-                    });
-                } else {
-                    m.totalConnections.textContent = "0 veces";
-                    m.historyList.innerHTML = `<li class="px-4 py-6 text-center text-slate-400 italic text-xs flex flex-col items-center gap-1"><i class="fas fa-info-circle"></i> Sin registros en el historial nuevo.</li>`;
-                }
-
-                // Mostrar con animación
-                m.el.classList.remove('hidden', 'modal-closed');
-                m.el.classList.add('modal-open');
-                requestAnimationFrame(() => {
-                    m.content.classList.remove('scale-95', 'opacity-0');
-                    m.content.classList.add('scale-100', 'opacity-100');
-                });
-            } else {
-                // Ocultar
-                m.content.classList.remove('scale-100', 'opacity-100');
-                m.content.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => {
-                    m.el.classList.remove('modal-open');
-                    m.el.classList.add('modal-closed');
-                    setTimeout(() => m.el.classList.add('hidden'), 200);
-                }, 200);
+        // --- VISUALIZACIÓN DE ESTADO ---
+        const setStatus = (status) => {
+            if(status === 'loading') {
+                ui.statusText.textContent = 'Actualizando...';
+                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-yellow-500';
+            } else if(status === 'success') {
+                ui.statusText.textContent = 'En línea';
+                ui.statusText.className = 'text-xs font-bold text-green-700';
+                ui.statusBadge.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full shadow-sm border border-green-200 w-fit';
+                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500';
+                ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75';
+            } else if(status === 'error') {
+                ui.statusText.textContent = 'Sin conexión';
+                ui.statusText.className = 'text-xs font-bold text-red-700';
+                ui.statusBadge.className = 'flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full shadow-sm border border-red-200 w-fit';
+                ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500';
+                ui.pingAnimate.className = 'hidden';
             }
         };
 
-        // 2. Toast Notification
-        const showToast = (user) => {
-            const div = document.createElement('div');
-            div.className = 'toast';
-            div.innerHTML = `
-                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0"><i class="fas fa-wifi"></i></div>
-                <div><p class="font-bold text-sm text-slate-900">${safe(user.Nombre)} ${safe(user.Apellido)}</p><p class="text-xs text-slate-500">Conectado recientemente</p></div>
-            `;
-            ui.toastContainer.appendChild(div);
-            requestAnimationFrame(() => div.classList.add('show'));
-            setTimeout(() => {
-                div.classList.remove('show');
-                div.addEventListener('transitionend', () => div.remove());
-            }, 4000);
-        };
-
-        // 3. Renderizar Tabla Principal
-        const renderTable = () => {
-            const term = ui.searchInput.value.toLowerCase();
-            const filtered = state.users.filter(u => 
-                (u.Nombre && u.Nombre.toLowerCase().includes(term)) || 
-                (u.Apellido && u.Apellido.toLowerCase().includes(term))
-            );
-
-            ui.tableBody.innerHTML = '';
-            
-            if (filtered.length === 0) {
-                ui.tableBody.innerHTML = `<tr><td colspan="4" class="text-center p-8 text-slate-400">No se encontraron usuarios.</td></tr>`;
-                return;
-            }
-
-            const fragment = document.createDocumentFragment();
-            filtered.forEach(u => {
-                const isActive = u.Estado && u.Estado.toLowerCase() === 'activo';
-                const date = parseDate(u.Timestamp);
-                const dateStr = date ? date.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit'}) : '--:--';
-                
-                const tr = document.createElement('tr');
-                tr.className = 'bg-white hover:bg-slate-50 transition-colors border-b cursor-pointer group';
-                tr.onclick = () => toggleModal(true, u);
-                
-                tr.innerHTML = `
-                    <td class="px-6 py-4 font-medium text-slate-900 flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors flex items-center justify-center text-xs text-slate-500 font-bold">
-                            ${safe(u.Nombre.charAt(0))}${safe(u.Apellido.charAt(0))}
-                        </div>
-                        ${safe(u.Nombre)} ${safe(u.Apellido)}
-                    </td>
-                    <td class="px-6 py-4">
-                        <span class="badge ${isActive ? 'badge-active' : 'badge-inactive'}">
-                            ${isActive ? '<i class="fas fa-check mr-1.5"></i>Activo' : '<i class="fas fa-times mr-1.5"></i>Inactivo'}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-xs text-slate-500 font-mono">
-                        <span class="bg-slate-100 px-2 py-1 rounded">Hoy ${dateStr}</span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <button class="btn ${isActive ? 'btn-red' : 'btn-green'} text-xs action-btn shadow-sm" data-id="${u['ID de Usuario']}" data-status="${isActive ? 'Inactivo' : 'Activo'}">
-                            ${isActive ? 'Desactivar' : 'Activar'}
-                        </button>
-                    </td>
-                `;
-                fragment.appendChild(tr);
-            });
-            ui.tableBody.appendChild(fragment);
-        };
-
-        // 4. API: Cambiar Estado
-        const changeStatus = async (btn) => {
-            const id = btn.dataset.id;
-            const status = btn.dataset.status;
-            
-            // UI Optimista
-            const originalContent = btn.innerHTML;
-            const originalClass = btn.className;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    redirect: 'follow',
-                    headers: {'Content-Type': 'text/plain;charset=utf-8'},
-                    body: JSON.stringify({ action: 'updateStatus', id: id, status: status })
-                });
-                const data = await res.json();
-                
-                if (data.status === 'success') {
-                    // Actualizar estado local
-                    const user = state.users.find(u => u['ID de Usuario'] == id);
-                    if (user) user.Estado = status;
-                    renderTable();
-                    updateCounters();
-                } else {
-                    throw new Error(data.message);
-                }
-            } catch (err) {
-                alert('No se pudo actualizar. Verifica tu conexión.');
-                console.error(err);
-                // Revertir
-                btn.innerHTML = originalContent;
-                btn.className = originalClass;
-                btn.disabled = false;
-            }
-        };
-
-        // 5. Contadores
-        const updateCounters = () => {
-            const active = state.users.filter(u => u.Estado === 'Activo').length;
-            ui.counters.total.textContent = state.users.length;
-            ui.counters.active.textContent = active;
-            ui.counters.inactive.textContent = state.users.length - active;
-        };
-
-        // 6. API: Obtener Datos
+        // --- FETCH DATA (CORE) ---
         const fetchData = async () => {
-            if (state.isFetching) return;
+            if(state.isFetching) return;
             state.isFetching = true;
-            ui.statusText.textContent = 'Actualizando...';
+            setStatus('loading');
             
             try {
-                const res = await fetch(SCRIPT_URL);
-                if (!res.ok) throw new Error('Error de red');
-                const data = await res.json();
+                // Añadimos parámetro 'action=read' y un timestamp para romper la caché del navegador
+                const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now(), {
+                    method: 'GET',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+
+                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+
+                const data = await response.json();
                 
                 // Ordenar: Más recientes primero
                 state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
                 
-                updateCounters();
-
-                // Actividad Reciente (Sidebar)
-                ui.activityList.innerHTML = '';
-                state.users.slice(0, 6).forEach(u => {
-                    const li = document.createElement('li');
-                    li.className = 'flex items-center gap-3 p-2 rounded hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0';
-                    li.innerHTML = `
-                        <div class="text-xs text-slate-400 font-mono w-14 text-right">${timeAgo(parseDate(u.Timestamp))}</div>
-                        <div class="flex-1 min-w-0">
-                            <p class="font-medium text-sm text-slate-700 truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
-                        </div>
-                        <div class="w-2 h-2 rounded-full flex-shrink-0 ${u.Estado === 'Activo' ? 'bg-green-500' : 'bg-red-400'}"></div>
-                    `;
-                    ui.activityList.appendChild(li);
-                });
-
-                // Toast para nuevo usuario
+                // Notificación de nuevo usuario (CORREGIDO: Ahora muestra notificación en la carga inicial también)
                 if (state.users.length > 0) {
                     const newest = state.users[0];
-                    if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp) {
+                    if (newest.Timestamp !== state.latestTimestamp) {
                         showToast(newest);
                     }
                     state.latestTimestamp = newest.Timestamp;
                 }
 
-                // Renderizar tabla (solo si no se está buscando)
-                if (document.activeElement !== ui.searchInput) renderTable();
+                renderTable(); 
+                updateCounters(); 
+                renderActivity();
                 
-                const now = new Date();
-                ui.statusText.textContent = `Actualizado ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-                ui.statusText.className = "text-xs font-medium text-slate-600";
-
-            } catch (err) {
-                console.error(err);
-                ui.statusText.textContent = 'Sin conexión';
-                ui.statusText.className = "text-xs font-bold text-red-500";
-                
-                // Aviso de CORS (para móviles)
-                if (window.location.protocol === 'content:' || window.location.protocol === 'file:') {
-                    ui.tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="4" class="p-6 text-center text-red-600 bg-red-50 rounded-lg">
-                            <i class="fas fa-wifi fa-2x mb-2"></i><br>
-                            <strong>Modo Offline Detectado</strong><br>
-                            Sube este archivo a un servidor (Tiiny.host) para que funcione.
-                        </td>
-                    </tr>`;
+                // Actualizar modal si está abierto (live update de puntos)
+                if(state.currentUser) { 
+                    const fresh = state.users.find(u => u['ID de Usuario'] == state.currentUser['ID de Usuario']); 
+                    if(fresh) { 
+                        state.currentUser = fresh; 
+                        if(!state.isEditing) ui.modal.points.textContent = fresh.Puntos || 0; 
+                    } 
                 }
-            } finally {
-                state.isFetching = false;
+                
+                setStatus('success');
+
+            } catch(e) { 
+                console.error("Error Fetch:", e);
+                setStatus('error');
+                
+                // Mensaje amigable si es por CORS/Local
+                if(state.users.length === 0) {
+                    let msg = 'Error de conexión con Google Sheets.';
+                    if(window.location.protocol === 'content:' || window.location.protocol === 'file:') {
+                        msg = `<i class="fas fa-exclamation-triangle text-2xl mb-2 text-red-500"></i><br>
+                               <strong>Error de Seguridad (CORS)</strong><br>
+                               Estás abriendo este archivo directamente desde carpetas.<br>
+                               Para que funcione, debes subirlo a un hosting (ej. Tiiny.host) o usar un servidor local.`;
+                    }
+                    ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50 rounded-lg border border-red-100">${msg}</td></tr>`;
+                }
+            } finally { 
+                state.isFetching = false; 
             }
         };
 
-        // --- EVENTOS ---
-        
-        // Clics en la tabla (Botones "Activar/Desactivar")
-        ui.tableBody.addEventListener('click', (e) => {
-            e.stopPropagation(); // Evitar abrir modal
-            const btn = e.target.closest('.action-btn');
-            if (btn) {
-                e.preventDefault();
-                changeStatus(btn);
+        // --- RENDERIZADO UI ---
+        const renderTable = () => {
+            const term = ui.searchInput.value.toLowerCase();
+            const list = state.users.filter(u => (u.Nombre+u.Apellido).toLowerCase().includes(term));
+            
+            ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400">Sin resultados</td></tr>';
+            
+            list.forEach(u => {
+                const active = u.Estado === 'Activo';
+                ui.tableBody.innerHTML += `
+                <tr class="bg-white hover:bg-slate-50 border-b cursor-pointer tr-user transition-colors group" data-id="${u['ID de Usuario']}">
+                    <td class="px-6 py-4 flex gap-3 font-medium text-slate-900 items-center">
+                        <div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors flex items-center justify-center text-xs font-bold text-slate-500">
+                            ${safe(u.Nombre[0])}${safe(u.Apellido[0])}
+                        </div>
+                        ${safe(u.Nombre)} ${safe(u.Apellido)}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="badge ${active?'badge-active':'badge-inactive'}">
+                            ${active ? '<i class="fas fa-check mr-1.5"></i>Activo' : '<i class="fas fa-times mr-1.5"></i>Inactivo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 font-bold text-yellow-600">
+                        <div class="flex items-center gap-1"><i class="fas fa-star text-xs text-yellow-400"></i>${u.Puntos||0}</div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <button class="btn ${active?'btn-red':'btn-green'} text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="${active?'Inactivo':'Activo'}">
+                            ${active?'Desactivar':'Activar'}
+                        </button>
+                    </td>
+                </tr>`;
+            });
+        };
+
+        const updateCounters = () => {
+            const active = state.users.filter(u=>u.Estado==='Activo').length;
+            ui.counters.total.textContent = state.users.length;
+            ui.counters.active.textContent = active;
+            ui.counters.inactive.textContent = state.users.length - active;
+        };
+
+        const renderActivity = () => {
+            ui.activityList.innerHTML = '';
+            state.users.slice(0,6).forEach(u => {
+                ui.activityList.innerHTML += `
+                <li class="flex gap-3 p-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors rounded-lg">
+                    <span class="text-xs text-slate-400 font-mono w-12 text-right pt-0.5">${timeAgo(parseDate(u.Timestamp))}</span>
+                    <span class="text-sm font-medium truncate flex-1 text-slate-700">${safe(u.Nombre)}</span>
+                    <span class="w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${u.Estado==='Activo'?'bg-green-500':'bg-red-400'}"></span>
+                </li>`;
+            });
+        };
+
+        const showToast = (msg) => {
+            const t = document.createElement('div'); t.className = 'toast';
+            t.innerHTML = `
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm">
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-slate-800">${safe(msg.Nombre)} ${safe(msg.Apellido)}</p>
+                    <p class="text-xs text-slate-500">Conexión detectada</p>
+                </div>`;
+            ui.toastContainer.appendChild(t);
+            requestAnimationFrame(() => t.classList.add('show'));
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
+        };
+
+        // --- LÓGICA MODAL ---
+        const openModal = (user) => {
+            state.currentUser = user; state.isEditing = false; updateEditModeUI();
+            const m = ui.modal;
+            m.fullName.textContent = `${user.Nombre} ${user.Apellido}`; m.id.textContent = user['ID de Usuario'];
+            m.phone.value = user.Teléfono || 'No registrado'; m.section.value = user.Sección || 'General'; m.contract.value = user['Tipo de Contrato'] || 'No especificado';
+            m.points.textContent = user.Puntos || 0;
+            m.date.textContent = user['Día de Ingreso'] ? `${user['Día de Ingreso']}/${user['Mes de Ingreso']}/${user['Año de Ingreso']}` : 'Desconocido';
+            
+            m.history.innerHTML = '';
+            if(user.Historial && user.Historial.length){
+                user.Historial.slice(0, 20).forEach(h => {
+                    const d = new Date(h);
+                    m.history.innerHTML += `
+                    <li class="px-4 py-3 flex justify-between items-center hover:bg-slate-50 border-b border-slate-50 last:border-0">
+                        <span class="text-slate-700 font-medium text-sm">${d.toLocaleDateString('es-CL', {day:'2-digit', month:'short', year:'numeric'})}</span>
+                        <span class="font-mono text-slate-400 text-xs bg-slate-100 px-2 py-1 rounded">${d.toLocaleTimeString('es-CL').slice(0,5)} hrs</span>
+                    </li>`;
+                });
+            } else { 
+                m.history.innerHTML = '<li class="p-8 text-center text-slate-400 text-sm flex flex-col items-center gap-2"><i class="fas fa-info-circle text-lg text-slate-300"></i><span>Sin historial reciente</span></li>'; 
             }
-        });
+            m.el.classList.remove('hidden', 'modal-closed'); m.el.classList.add('modal-open'); m.content.classList.remove('scale-95');
+        };
 
-        // Búsqueda
-        let debounce;
-        ui.searchInput.addEventListener('input', () => {
-            clearTimeout(debounce);
-            debounce = setTimeout(renderTable, 300);
-        });
+        const closeModal = () => { ui.modal.el.classList.add('modal-closed'); ui.modal.content.classList.add('scale-95'); setTimeout(() => ui.modal.el.classList.add('hidden'), 200); state.currentUser = null; };
+        const toggleEditMode = () => { state.isEditing = !state.isEditing; updateEditModeUI(); };
+        const updateEditModeUI = () => {
+            const m = ui.modal;
+            if (state.isEditing) {
+                m.container.classList.add('is-editing'); m.phone.disabled = false; m.section.disabled = false; m.contract.disabled = false;
+                if(m.phone.value === 'No registrado') m.phone.value = ''; if(m.section.value === 'General') m.section.value = ''; if(m.contract.value === 'No especificado') m.contract.value = '';
+                m.saveBtn.classList.remove('hidden'); m.editBtn.innerHTML = '<i class="fas fa-times mr-1"></i> Cancelar'; m.editBtn.className = "bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm";
+            } else {
+                m.container.classList.remove('is-editing'); m.phone.disabled = true; m.section.disabled = true; m.contract.disabled = true; m.saveBtn.classList.add('hidden'); m.editBtn.innerHTML = '<i class="fas fa-pen mr-1.5"></i> Editar'; m.editBtn.className = "bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm";
+                if(state.currentUser && !state.isEditing) { m.phone.value = state.currentUser.Teléfono || 'No registrado'; m.section.value = state.currentUser.Sección || 'General'; m.contract.value = state.currentUser['Tipo de Contrato'] || 'No especificado'; }
+            }
+        };
 
-        // Modal
-        ui.modal.closeBtn.addEventListener('click', () => toggleModal(false));
-        ui.modal.el.addEventListener('click', (e) => {
-            if (e.target === ui.modal.el) toggleModal(false);
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') toggleModal(false);
-        });
+        // --- ACCIONES (Guardar, Puntos, Estado) ---
+        const saveUserChanges = async () => {
+            const m = ui.modal, btn = m.saveBtn, originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
+            const payload = { action: 'editUser', id: state.currentUser['ID de Usuario'], telefono: m.phone.value, seccion: m.section.value, contrato: m.contract.value };
+            try {
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+                state.currentUser.Teléfono = payload.telefono; state.currentUser.Sección = payload.seccion; state.currentUser['Tipo de Contrato'] = payload.contrato; 
+                toggleEditMode(); renderTable();
+                
+                // Toast de éxito
+                const t = document.createElement('div'); t.className = 'toast show';
+                t.innerHTML = `<div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fas fa-check"></i></div><p class="font-bold text-sm">Datos guardados</p>`;
+                ui.toastContainer.appendChild(t); setTimeout(()=>t.remove(), 3000);
+            } catch (e) { alert('Error: ' + e.message); } finally { btn.innerHTML = originalText; btn.disabled = false; }
+        };
 
-        // --- INICIALIZACIÓN ---
-        fetchData();
-        setInterval(fetchData, 15000); // Actualizar cada 15 segundos
+        const updatePoints = async (amount) => {
+            const user = state.currentUser; if(!user) return;
+            const currentVal = parseInt(ui.modal.points.textContent); ui.modal.points.textContent = currentVal + amount; 
+            try {
+                const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: user['ID de Usuario'], amount: amount }) }); 
+                const data = await res.json();
+                if(data.status === 'success') { user.Puntos = data.newTotal; renderTable(); } else throw new Error();
+            } catch (e) { ui.modal.points.textContent = currentVal; alert('Error al actualizar puntos'); }
+        };
+
+        const toggleStatus = async (btn) => {
+            const id = btn.dataset.id, status = btn.dataset.status, original = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try { 
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status }) }); 
+                const u = state.users.find(x => x['ID de Usuario'] == id); if(u) u.Estado = status; 
+                renderTable(); updateCounters(); 
+            } catch(e) { btn.innerHTML = original; alert('Error conexión'); }
+        };
+
+        // --- EVENT LISTENERS ---
+        ui.searchInput.addEventListener('input', () => setTimeout(renderTable, 300));
+        ui.tableBody.addEventListener('click', e => { e.stopPropagation(); if(e.target.closest('.btn-status')) toggleStatus(e.target.closest('.btn-status')); else if(e.target.closest('.tr-user')) openModal(state.users.find(u => u['ID de Usuario'] == e.target.closest('.tr-user').dataset.id)); });
+        ui.modal.closeBtn.addEventListener('click', closeModal); ui.modal.editBtn.addEventListener('click', toggleEditMode); ui.modal.saveBtn.addEventListener('click', saveUserChanges);
+        document.querySelectorAll('.point-btn').forEach(btn => btn.addEventListener('click', () => updatePoints(parseInt(btn.dataset.val))));
+
+        // --- INICIO ---
+        fetchData(); 
+        setInterval(fetchData, 10000);
     });
     </script>
 </body>
