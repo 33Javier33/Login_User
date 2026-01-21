@@ -80,9 +80,25 @@
         <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
             <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <h2 class="text-lg font-bold text-slate-800">Directorio de Socios</h2>
-                <div class="relative w-full sm:w-auto">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all">
+                
+                <!-- NUEVO: Contenedor de Filtros y Búsqueda -->
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    <!-- Dropdown de Filtro -->
+                    <div class="relative">
+                        <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"></i>
+                        <select id="filterInput" class="pl-9 pr-8 py-2 border border-slate-200 rounded-lg w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all appearance-none cursor-pointer hover:bg-white">
+                            <option value="all">Todos</option>
+                            <option value="Activo">Activos</option>
+                            <option value="Inactivo">Inactivos</option>
+                        </select>
+                        <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                    </div>
+
+                    <!-- Input de Búsqueda -->
+                    <div class="relative w-full sm:w-auto">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all">
+                    </div>
                 </div>
             </div>
             <div class="overflow-x-auto rounded-lg border border-slate-100">
@@ -167,7 +183,7 @@
                 </button>
 
                 <!-- Historial -->
-                <div class="border-t border-slate-100 pt-5">
+                <div class="border-t border-slate-100 pt-5 mb-4">
                     <h4 class="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
                         <i class="fas fa-history text-slate-400"></i> Historial de Accesos
                     </h4>
@@ -181,6 +197,14 @@
                         </ul>
                     </div>
                     <p class="text-center text-xs text-slate-400 mt-2 italic">Mostrando últimos 20 registros</p>
+                </div>
+
+                <!-- NUEVO: Zona de Peligro / Borrar -->
+                <div class="border-t border-red-100 bg-red-50/50 rounded-xl p-4 mt-6">
+                    <h4 class="text-xs font-bold text-red-400 uppercase mb-2">Zona de Peligro</h4>
+                    <button id="deleteUserBtn" class="w-full border border-red-200 bg-white text-red-600 hover:bg-red-50 font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center gap-2">
+                        <i class="fas fa-trash-alt"></i> Eliminar Usuario Permanentemente
+                    </button>
                 </div>
             </div>
         </div>
@@ -202,9 +226,11 @@
                 fullName: document.getElementById('modal-nombre-completo'), id: document.getElementById('modal-id'), phone: document.getElementById('modal-telefono'),
                 section: document.getElementById('modal-seccion'), contract: document.getElementById('modal-contrato'), date: document.getElementById('modal-ingreso'),
                 points: document.getElementById('modal-puntos-display'), history: document.getElementById('modal-historial-lista'),
-                editBtn: document.getElementById('toggleEditBtn'), saveBtn: document.getElementById('saveChangesBtn'), closeBtn: document.getElementById('closeModalBtn')
+                editBtn: document.getElementById('toggleEditBtn'), saveBtn: document.getElementById('saveChangesBtn'), closeBtn: document.getElementById('closeModalBtn'),
+                deleteBtn: document.getElementById('deleteUserBtn') // Nuevo Botón
             },
             searchInput: document.getElementById('searchInput'),
+            filterInput: document.getElementById('filterInput'), // Nuevo Filtro
             counters: { total: document.getElementById('total-users'), active: document.getElementById('active-users'), inactive: document.getElementById('inactive-users') },
             activityList: document.getElementById('recent-activity-list'), toastContainer: document.getElementById('toast-container'), 
             statusText: document.getElementById('last-update-text'), statusBadge: document.getElementById('status-badge'),
@@ -243,7 +269,6 @@
             setStatus('loading');
             
             try {
-                // Añadimos parámetro 'action=read' y un timestamp para romper la caché del navegador
                 const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now(), {
                     method: 'GET',
                     redirect: 'follow',
@@ -257,10 +282,10 @@
                 // Ordenar: Más recientes primero
                 state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
                 
-                // Notificación de nuevo usuario (CORREGIDO: Ahora muestra notificación en la carga inicial también)
+                // Notificación de nuevo usuario
                 if (state.users.length > 0) {
                     const newest = state.users[0];
-                    if (newest.Timestamp !== state.latestTimestamp) {
+                    if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp) {
                         showToast(newest);
                     }
                     state.latestTimestamp = newest.Timestamp;
@@ -284,27 +309,27 @@
             } catch(e) { 
                 console.error("Error Fetch:", e);
                 setStatus('error');
-                
-                // Mensaje amigable si es por CORS/Local
                 if(state.users.length === 0) {
-                    let msg = 'Error de conexión con Google Sheets.';
-                    if(window.location.protocol === 'content:' || window.location.protocol === 'file:') {
-                        msg = `<i class="fas fa-exclamation-triangle text-2xl mb-2 text-red-500"></i><br>
-                               <strong>Error de Seguridad (CORS)</strong><br>
-                               Estás abriendo este archivo directamente desde carpetas.<br>
-                               Para que funcione, debes subirlo a un hosting (ej. Tiiny.host) o usar un servidor local.`;
-                    }
-                    ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50 rounded-lg border border-red-100">${msg}</td></tr>`;
+                    ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50 rounded-lg border border-red-100">Error de conexión. Verifica que el script esté publicado.</td></tr>`;
                 }
             } finally { 
                 state.isFetching = false; 
             }
         };
 
-        // --- RENDERIZADO UI ---
+        // --- RENDERIZADO UI CON FILTROS ---
         const renderTable = () => {
-            const term = ui.searchInput.value.toLowerCase();
-            const list = state.users.filter(u => (u.Nombre+u.Apellido).toLowerCase().includes(term));
+            const searchTerm = ui.searchInput.value.toLowerCase();
+            const filterStatus = ui.filterInput.value; // Obtener valor del select (all, Activo, Inactivo)
+
+            const list = state.users.filter(u => {
+                // 1. Filtrar por texto
+                const matchesSearch = (u.Nombre+u.Apellido).toLowerCase().includes(searchTerm);
+                // 2. Filtrar por estado
+                const matchesStatus = filterStatus === 'all' || u.Estado === filterStatus;
+                
+                return matchesSearch && matchesStatus;
+            });
             
             ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400">Sin resultados</td></tr>';
             
@@ -354,9 +379,19 @@
             });
         };
 
-        const showToast = (msg) => {
+        const showToast = (msg, type = 'info') => {
             const t = document.createElement('div'); t.className = 'toast';
-            t.innerHTML = `
+            if (type === 'delete') {
+                 t.innerHTML = `
+                <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600 flex-shrink-0 shadow-sm">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div>
+                    <p class="font-bold text-sm text-slate-800">Usuario Eliminado</p>
+                    <p class="text-xs text-slate-500">Se ha borrado del registro</p>
+                </div>`;
+            } else {
+                 t.innerHTML = `
                 <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 flex-shrink-0 shadow-sm">
                     <i class="fas fa-wifi"></i>
                 </div>
@@ -364,6 +399,7 @@
                     <p class="font-bold text-sm text-slate-800">${safe(msg.Nombre)} ${safe(msg.Apellido)}</p>
                     <p class="text-xs text-slate-500">Conexión detectada</p>
                 </div>`;
+            }
             ui.toastContainer.appendChild(t);
             requestAnimationFrame(() => t.classList.add('show'));
             setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 4000);
@@ -408,7 +444,7 @@
             }
         };
 
-        // --- ACCIONES (Guardar, Puntos, Estado) ---
+        // --- ACCIONES (Guardar, Puntos, Estado, BORRAR) ---
         const saveUserChanges = async () => {
             const m = ui.modal, btn = m.saveBtn, originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...'; btn.disabled = true;
@@ -418,7 +454,6 @@
                 state.currentUser.Teléfono = payload.telefono; state.currentUser.Sección = payload.seccion; state.currentUser['Tipo de Contrato'] = payload.contrato; 
                 toggleEditMode(); renderTable();
                 
-                // Toast de éxito
                 const t = document.createElement('div'); t.className = 'toast show';
                 t.innerHTML = `<div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fas fa-check"></i></div><p class="font-bold text-sm">Datos guardados</p>`;
                 ui.toastContainer.appendChild(t); setTimeout(()=>t.remove(), 3000);
@@ -445,10 +480,50 @@
             } catch(e) { btn.innerHTML = original; alert('Error conexión'); }
         };
 
+        // --- NUEVA FUNCIÓN: ELIMINAR USUARIO ---
+        const deleteUser = async () => {
+            if(!state.currentUser) return;
+            
+            // Confirmación
+            const confirmMsg = `¿Estás seguro de que deseas eliminar a ${state.currentUser.Nombre}?\n\nEsta acción NO se puede deshacer.`;
+            if(!confirm(confirmMsg)) return;
+
+            const btn = ui.modal.deleteBtn;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'deleteUser', id: state.currentUser['ID de Usuario'] })
+                });
+                
+                // Remover usuario del estado local
+                state.users = state.users.filter(u => u['ID de Usuario'] !== state.currentUser['ID de Usuario']);
+                
+                closeModal();
+                renderTable();
+                updateCounters();
+                showToast(null, 'delete'); // Mostrar toast de eliminación
+
+            } catch(e) {
+                alert('Hubo un error al eliminar. Verifica tu conexión o el script.');
+                console.error(e);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        };
+
         // --- EVENT LISTENERS ---
         ui.searchInput.addEventListener('input', () => setTimeout(renderTable, 300));
+        ui.filterInput.addEventListener('change', renderTable); // Listener para el filtro
         ui.tableBody.addEventListener('click', e => { e.stopPropagation(); if(e.target.closest('.btn-status')) toggleStatus(e.target.closest('.btn-status')); else if(e.target.closest('.tr-user')) openModal(state.users.find(u => u['ID de Usuario'] == e.target.closest('.tr-user').dataset.id)); });
-        ui.modal.closeBtn.addEventListener('click', closeModal); ui.modal.editBtn.addEventListener('click', toggleEditMode); ui.modal.saveBtn.addEventListener('click', saveUserChanges);
+        ui.modal.closeBtn.addEventListener('click', closeModal); 
+        ui.modal.editBtn.addEventListener('click', toggleEditMode); 
+        ui.modal.saveBtn.addEventListener('click', saveUserChanges);
+        ui.modal.deleteBtn.addEventListener('click', deleteUser); // Listener para borrar
         document.querySelectorAll('.point-btn').forEach(btn => btn.addEventListener('click', () => updatePoints(parseInt(btn.dataset.val))));
 
         // --- INICIO ---
