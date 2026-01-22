@@ -210,15 +210,17 @@
             } catch(e) { alert('Error: ' + e.message); btn.innerHTML = originalHTML; btn.disabled = false; }
         };
 
-        // --- RENDERIZADO ACTIVIDAD RECIENTE (CON LÓGICA DE ESTADO MEJORADA) ---
+        // --- [CÓDIGO CORREGIDO] RENDERIZADO ACTIVIDAD RECIENTE ---
         const renderActivity = () => {
             ui.activityList.innerHTML = '';
-            if (state.users.length === 0) { ui.activityList.innerHTML = `<li class="text-center text-slate-400 text-xs py-8">Sin actividad reciente</li>`; return; }
+            if (state.users.length === 0) {
+                ui.activityList.innerHTML = `<li class="text-center text-slate-400 text-xs py-8">Sin actividad reciente</li>`;
+                return;
+            }
 
             state.users.slice(0, 6).forEach(u => {
                 const initials = (safe(u.Nombre[0]) + safe(u.Apellido[0])).toUpperCase();
                 
-                // Lógica de Tiempo Real: Si hace más de 12 min no hay latido, está ausente (o se cerró mal)
                 const lastSeen = parseDate(u.Timestamp);
                 const minutesAgo = (new Date() - lastSeen) / 1000 / 60;
                 
@@ -227,27 +229,29 @@
                 let showKickButton = false;
 
                 if (u.Estado === 'Inactivo') {
-                    // Estado Bloqueado (Base de datos manda)
+                    // 1. Primero, verificar si el usuario está bloqueado.
                     statusTextHtml = `<span class="text-red-600 font-semibold">Bloqueado</span>`;
                     statusDotClass = 'bg-red-500';
-                } else if (u.Estado === 'Desconectado') {
-                    // Estado Desconectado explícito (Usuario cerró o se minimizó)
-                    statusTextHtml = `<span class="text-slate-400 font-semibold">Desconectado</span>`;
-                    statusDotClass = 'bg-slate-300';
                 } else if (u.Estado === 'KICK') {
-                    // Estado Transitorio
+                    // 2. Verificar si se está cerrando la sesión.
                     statusTextHtml = `<span class="text-yellow-600 font-bold italic">Cerrando...</span>`;
                     statusDotClass = 'bg-yellow-400 animate-pulse';
+                } else if (u.Estado === 'Desconectado') {
+                    // 3. El usuario cerró la sesión correctamente.
+                    statusTextHtml = `<span class="text-slate-400 font-semibold">Desconectado</span>`;
+                    statusDotClass = 'bg-slate-300';
                 } else if (u.Estado === 'Activo') {
-                    // Estado Activo: Revisamos el tiempo para saber si es "En Línea" o "Ausente"
+                    // 4. Si el estado es 'Activo', verificamos el tiempo.
                     if (minutesAgo < 12) {
+                        // Si la última actividad fue hace menos de 12 minutos, está en línea.
                         statusTextHtml = `<span class="text-green-600 font-bold">En Línea</span>`;
                         statusDotClass = 'bg-green-500 animate-pulse';
-                        showKickButton = true; // Botón disponible
+                        showKickButton = true; // Se puede forzar el cierre.
                     } else {
+                        // Si pasaron más de 12 minutos, se considera ausente.
                         statusTextHtml = `<span class="text-orange-500 font-semibold">Ausente / Sin cerrar</span>`;
                         statusDotClass = 'bg-orange-400';
-                        showKickButton = true; // Botón disponible por si queremos forzar cierre
+                        showKickButton = true; // También se puede forzar el cierre.
                     }
                 }
 
