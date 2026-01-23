@@ -129,7 +129,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 transition-transform duration-200 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-start p-6 border-b border-slate-100 bg-white rounded-t-2xl z-10 flex-shrink-0">
                 <div>
-                    <!-- [MODIFICADO] Header dinámico -->
+                    <!-- Header dinámico -->
                     <h3 class="text-xl font-bold text-slate-900 leading-tight" id="modal-header-display">...</h3>
                     <p class="text-sm text-slate-500 mt-1">ID: <span id="modal-id" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">...</span></p>
                 </div>
@@ -163,7 +163,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-5 mb-6">
-                    <!-- [MODIFICADO] Inputs para Nombre y Apellido -->
+                    <!-- Inputs para Nombre y Apellido -->
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1">Nombre</label><input type="text" id="modal-nombre" class="editable-input" disabled></div>
                         <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1">Apellido</label><input type="text" id="modal-apellido" class="editable-input" disabled></div>
@@ -171,7 +171,7 @@
 
                     <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-phone-alt"></i> Teléfono</label><input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar"></div>
                     
-                    <!-- [MODIFICADO] Select para Sección -->
+                    <!-- Select para Sección -->
                     <div class="space-y-1">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-layer-group"></i> Sección</label>
                         <select id="modal-seccion" class="editable-input" disabled>
@@ -186,7 +186,7 @@
                     
                     <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-file-contract"></i> Contrato</label><input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado"></div>
                     
-                    <!-- [MODIFICADO] Fecha de Ingreso Editable -->
+                    <!-- Fecha de Ingreso Editable -->
                     <div class="pt-3 border-t border-slate-100">
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1 mb-2"><i class="far fa-calendar-alt"></i> Fecha de Ingreso</label>
                         <div class="flex gap-2">
@@ -238,7 +238,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div class="p-6 border-b">
                 <h3 class="text-lg font-bold text-slate-800">Gestionar Ausencias</h3>
-                <p class="text-sm text-slate-500">Haz clic en los días para marcarlos como ausencia.</p>
+                <p class="text-sm text-slate-500">Haz clic en los días para marcarlos/desmarcarlos.</p>
             </div>
             <div class="p-6">
                 <div id="calendar-header" class="flex justify-between items-center mb-4">
@@ -310,6 +310,20 @@
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
         const timeAgo = d => { if(!d)return'';const s=Math.floor((new Date()-d)/1000);return s<60?'ahora':s<3600?`${Math.floor(s/60)} min`:`${Math.floor(s/3600)} h`; };
         
+        // [NUEVO] Función para normalizar fechas al formato AAAA-MM-DD
+        function normalizarFecha(fechaInput) {
+            if (!fechaInput) return null;
+            if (typeof fechaInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaInput)) {
+                return fechaInput;
+            }
+            const d = new Date(fechaInput);
+            if (isNaN(d.getTime())) return fechaInput; 
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         const setStatus = (status) => {
             if(status === 'loading') { ui.statusText.textContent = 'Actualizando...'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-yellow-500'; } 
             else if(status === 'success') { ui.statusText.textContent = 'En línea'; ui.statusText.className = 'text-xs font-bold text-green-700'; ui.statusBadge.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full shadow-sm border border-green-200 w-fit'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500'; ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'; } 
@@ -349,7 +363,7 @@
                         state.currentUser = fresh;
                         if(!state.isEditing) {
                             ui.modal.points.textContent = fresh.Puntos || 0;
-                            ui.modal.headerDisplay.textContent = `${fresh.Nombre} ${fresh.Apellido}`; // Actualizar Header
+                            ui.modal.headerDisplay.textContent = `${fresh.Nombre} ${fresh.Apellido}`; 
                         }
                         ui.modal.saldo.textContent = `$${(fresh.SaldoAnterior || 0).toLocaleString('es-CL')}`;
                         const absenceCount = Array.isArray(fresh.DiasAusencia) ? fresh.DiasAusencia.length : 0;
@@ -518,7 +532,6 @@
             updateEditModeUI();
             const m = ui.modal;
             
-            // [MODIFICADO] Llenado de campos
             m.headerDisplay.textContent = `${user.Nombre} ${user.Apellido}`;
             m.nombre.value = user.Nombre || '';
             m.apellido.value = user.Apellido || '';
@@ -579,7 +592,6 @@
                 m.editBtn.innerHTML = '<i class="fas fa-pen mr-1.5"></i> Editar';
                 m.editBtn.className = 'bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm';
                 
-                // Revertir cambios si se cancela (opcional, aquí solo recargamos del estado actual)
                 if(state.currentUser) {
                     m.nombre.value = state.currentUser.Nombre || '';
                     m.apellido.value = state.currentUser.Apellido || '';
@@ -591,7 +603,6 @@
             }
         };
 
-        // [MODIFICADO] Guardar cambios
         const saveUserChanges = async () => {
             if(!state.currentUser) return;
             const m = ui.modal;
@@ -614,7 +625,6 @@
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
                 
-                // Actualizar estado local
                 state.currentUser.Nombre = payload.nombre;
                 state.currentUser.Apellido = payload.apellido;
                 state.currentUser.Teléfono = payload.telefono;
@@ -627,7 +637,7 @@
                 m.headerDisplay.textContent = `${payload.nombre} ${payload.apellido}`;
                 showToast('Cambios guardados', 'success');
                 toggleEditMode();
-                fetchData(); // Refrescar tabla principal
+                fetchData(); 
             } catch(e) {
                 alert('Error al guardar: ' + e.message);
             } finally {
@@ -715,27 +725,33 @@
             ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].forEach(d => html += `<div class="day-name">${d}</div>`);
             for (let i = 0; i < startingDay; i++) html += `<div class="day empty"></div>`;
             
-            const markedDays = new Set(state.currentUser.DiasAusencia || []);
+            // [CORREGIDO] Normalización de fechas para el Set
+            const markedDays = new Set((state.currentUser.DiasAusencia || []).map(normalizarFecha));
 
             for (let i = 1; i <= daysInMonth; i++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                // [CORREGIDO] Chequeo usando la misma normalización
                 const isMarked = markedDays.has(dateStr);
                 html += `<div class="day ${isMarked ? 'absent' : ''}" data-date="${dateStr}">${i}</div>`;
             }
             html += `</div>`;
             ui.absenceModal.calendarContainer.innerHTML = html;
 
+            // [CORREGIDO] Toggle robusto (quitar y poner)
             ui.absenceModal.calendarContainer.querySelectorAll('.day:not(.empty)').forEach(dayEl => {
                 dayEl.addEventListener('click', () => {
-                    dayEl.classList.toggle('absent');
+                    if (dayEl.classList.contains('absent')) {
+                        dayEl.classList.remove('absent');
+                    } else {
+                        dayEl.classList.add('absent');
+                    }
                 });
             });
         }
 
-        const notificarCierre = () => { /* ... (sin cambios) ... */ };
+        const notificarCierre = () => { /* ... */ };
         window.addEventListener('pagehide', notificarCierre);
 
-        // [MODIFICADO] Input en vivo para actualizar el título al editar nombre/apellido
         ui.modal.nombre.addEventListener('input', () => {
             ui.modal.headerDisplay.textContent = `${ui.modal.nombre.value} ${ui.modal.apellido.value}`;
         });
