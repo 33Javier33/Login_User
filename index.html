@@ -6,261 +6,384 @@
     <title>Panel de Gestión de Usuarios</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#64748b',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(79, 70, 229, 0.3)',
+                    }
+                }
+            }
+        }
+    </script>
+
     <style>
-        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { 
+            background-color: #f1f5f9; 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
         
-        .badge { display: inline-flex; align-items: center; padding: 0.25em 0.7em; font-size: 0.75rem; font-weight: 700; border-radius: 9999px; line-height: 1; }
-        .badge-active { color: #15803d; background-color: #dcfce7; border: 1px solid #bbf7d0; }
-        .badge-inactive { color: #b91c1c; background-color: #fee2e2; border: 1px solid #fecaca; }
+        .badge { display: inline-flex; align-items: center; padding: 0.35em 0.8em; font-size: 0.70rem; font-weight: 700; border-radius: 9999px; letter-spacing: 0.025em; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .badge-active { color: #065f46; background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); border: 1px solid #6ee7b7; }
+        .badge-inactive { color: #991b1b; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border: 1px solid #fca5a5; }
         .badge-offline { color: #475569; background-color: #f1f5f9; border: 1px solid #cbd5e1; }
         
-        .btn { padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; }
-        .btn-green { background-color: #22c55e; color: white; }
-        .btn-red { background-color: #ef4444; color: white; }
+        .btn { padding: 0.5rem 1rem; border-radius: 0.75rem; font-weight: 600; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; font-size: 0.875rem; }
+        .btn:active { transform: scale(0.97); }
+        .btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3); }
+        .btn-green:hover { box-shadow: 0 6px 10px -1px rgba(16, 185, 129, 0.4); transform: translateY(-1px); }
+        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.3); }
+        .btn-red:hover { box-shadow: 0 6px 10px -1px rgba(239, 68, 68, 0.4); transform: translateY(-1px); }
         
-        .editable-input { background: transparent; border: 1px solid transparent; width: 100%; padding: 4px 0; font-weight: 600; color: #334155; transition: all 0.2s; }
-        .editable-input:disabled { background: transparent; opacity: 1; cursor: default; border-bottom: 1px dashed #e2e8f0; }
-        
-        /* Select específico deshabilitado */
-        select.editable-input:disabled { -webkit-appearance: none; appearance: none; background-image: none; border-bottom: 1px dashed #e2e8f0; }
+        .editable-input { background: transparent; border: 1px solid transparent; width: 100%; padding: 6px 0; font-weight: 500; color: #1e293b; transition: all 0.2s; border-radius: 6px; }
+        .editable-input:disabled { background: transparent; opacity: 1; cursor: default; color: #334155; }
+        select.editable-input:disabled { -webkit-appearance: none; appearance: none; background-image: none; padding-right: 0; }
 
-        .is-editing .editable-input { background: #ffffff; border: 1px solid #cbd5e1; padding: 4px 8px; border-radius: 6px; }
-        .is-editing .editable-input:focus { border-color: #3b82f6; outline: 2px solid #bfdbfe; }
+        .is-editing .editable-input { background: #ffffff; border: 1px solid #cbd5e1; padding: 6px 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .is-editing .editable-input:focus { border-color: #6366f1; outline: 2px solid #c7d2fe; }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         
         .modal-open { opacity: 1; pointer-events: auto; }
         .modal-closed { opacity: 0; pointer-events: none; }
         
-        #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
-        .toast { pointer-events: auto; background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 5px solid #3b82f6; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 1rem; align-items: center; }
+        #toast-container { position: fixed; top: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; pointer-events: none; }
+        .toast { pointer-events: auto; background: white; padding: 1rem 1.25rem; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); border-left: 0; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 1rem; align-items: center; border: 1px solid #f1f5f9; }
         .toast.show { transform: translateX(0); }
 
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .day-name { font-weight: bold; color: #64748b; padding-bottom: 5px; font-size: 0.75rem; }
-        .day { padding: 8px; border-radius: 9999px; background-color: #f1f5f9; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .day:hover { background-color: #e2e8f0; }
-        .day.absent { background-color: #ef4444; color: #fff; font-weight: bold; border-color: #b91c1c; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .day-name { font-weight: 700; color: #94a3b8; padding-bottom: 8px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .day { width: 100%; aspect-ratio: 1; display: flex; items-center; justify-content: center; border-radius: 0.75rem; background-color: #f8fafc; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; font-size: 0.85rem; font-weight: 500; color: #475569; }
+        .day:hover { background-color: #e2e8f0; transform: scale(1.05); }
+        .day.absent { background-color: #fef2f2; color: #dc2626; font-weight: 800; border-color: #fecaca; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.1); }
         .day.empty { background-color: transparent; cursor: default; }
+
+        .tr-user { transition: all 0.2s ease; }
+        .tr-user:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); z-index: 10; position: relative; border-color: transparent; background-color: white !important; }
+        
+        .point-btn { transition: all 0.2s; }
+        .point-btn:active { transform: scale(0.9); }
     </style>
 </head>
-<body class="p-3 md:p-8 text-slate-800 pb-20">
+<body class="p-4 md:p-8 text-slate-700 pb-24 antialiased selection:bg-indigo-100 selection:text-indigo-700">
 
     <div id="toast-container"></div>
 
     <div class="max-w-7xl mx-auto">
-        <header class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- HEADER -->
+        <header class="mb-6 md:mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-                <h1 class="text-2xl md:text-3xl font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fas fa-users-cog text-blue-600"></i> Gestión de Socios
+                <h1 class="text-3xl md:text-4xl font-extrabold text-slate-800 flex items-center gap-3 tracking-tight">
+                    <span class="bg-gradient-to-br from-indigo-500 to-purple-600 text-white w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200 text-lg md:text-xl">
+                        <i class="fas fa-users-cog"></i>
+                    </span>
+                    Gestión de Socios
                 </h1>
-                <p class="text-slate-500 text-sm mt-1">Panel de Administración en Tiempo Real</p>
+                <p class="text-slate-500 text-sm font-medium mt-2 ml-1">Panel de Administración en Tiempo Real</p>
             </div>
-            <div id="status-badge" class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full shadow-sm border border-slate-200 w-fit transition-colors duration-300">
+            
+            <div id="status-badge" class="flex items-center gap-2.5 bg-white/80 backdrop-blur px-4 py-2 rounded-full shadow-sm border border-slate-200 w-fit transition-colors duration-300">
                 <span class="relative flex h-3 w-3">
                   <span id="ping-animate" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
                   <span id="ping-static" class="relative inline-flex rounded-full h-3 w-3 bg-slate-500"></span>
                 </span>
-                <p class="text-xs font-medium text-slate-600" id="last-update-text">Conectando...</p>
+                <p class="text-xs font-bold text-slate-600 uppercase tracking-wide" id="last-update-text">Conectando...</p>
             </div>
         </header>
 
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200 grid grid-cols-3 divide-x divide-slate-100">
-                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total</p><p id="total-users" class="text-3xl font-bold text-slate-800 mt-1">0</p></div>
-                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Activos</p><p id="active-users" class="text-3xl font-bold text-green-600 mt-1">0</p></div>
-                <div class="text-center px-2"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Inactivos</p><p id="inactive-users" class="text-3xl font-bold text-red-600 mt-1">0</p></div>
+        <!-- DASHBOARD GRID -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 mb-8">
+            <!-- TARJETAS DE ESTADÍSTICAS CLICKABLES -->
+            <div class="lg:col-span-2">
+                <div class="grid grid-cols-3 gap-2 md:gap-4 h-full">
+                    <!-- Total (Click => Todos) -->
+                    <div id="card-total" class="bg-white cursor-pointer hover:bg-slate-50 active:scale-95 transition-all p-2 md:p-5 rounded-xl md:rounded-2xl shadow-soft border border-slate-100 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden md:block">
+                            <i class="fas fa-users text-6xl text-slate-400"></i>
+                        </div>
+                        <i class="fas fa-users text-slate-400 text-xs md:hidden mb-1 opacity-50"></i>
+                        <p class="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider z-10 text-center leading-tight">Total</p>
+                        <p id="total-users" class="text-2xl md:text-4xl font-black text-slate-700 z-10 mt-0 md:mt-1">0</p>
+                        <div class="w-full h-0.5 md:h-1 bg-gradient-to-r from-transparent via-slate-200 to-transparent mt-1 md:mt-3 opacity-50 md:opacity-100"></div>
+                    </div>
+
+                    <!-- Activos (Click => Activos) -->
+                    <div id="card-active" class="bg-white cursor-pointer hover:bg-emerald-50 active:scale-95 transition-all p-2 md:p-5 rounded-xl md:rounded-2xl shadow-soft border border-emerald-100 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden md:block">
+                            <i class="fas fa-user-check text-6xl text-emerald-400"></i>
+                        </div>
+                        <i class="fas fa-user-check text-emerald-400 text-xs md:hidden mb-1 opacity-50"></i>
+                        <p class="text-[10px] md:text-xs font-bold text-emerald-600/70 uppercase tracking-wider z-10 text-center leading-tight">En Sala</p>
+                        <p id="active-users" class="text-2xl md:text-4xl font-black text-emerald-600 z-10 mt-0 md:mt-1">0</p>
+                        <div class="w-full h-0.5 md:h-1 bg-gradient-to-r from-transparent via-emerald-200 to-transparent mt-1 md:mt-3 opacity-50 md:opacity-100"></div>
+                    </div>
+
+                    <!-- Inactivos (Click => Bloqueados) -->
+                    <div id="card-inactive" class="bg-white cursor-pointer hover:bg-red-50 active:scale-95 transition-all p-2 md:p-5 rounded-xl md:rounded-2xl shadow-soft border border-red-100 flex flex-col items-center justify-center relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity hidden md:block">
+                            <i class="fas fa-user-lock text-6xl text-red-400"></i>
+                        </div>
+                        <i class="fas fa-user-lock text-red-400 text-xs md:hidden mb-1 opacity-50"></i>
+                        <p class="text-[10px] md:text-xs font-bold text-red-600/70 uppercase tracking-wider z-10 text-center leading-tight">Bloqueados</p>
+                        <p id="inactive-users" class="text-2xl md:text-4xl font-black text-red-600 z-10 mt-0 md:mt-1">0</p>
+                        <div class="w-full h-0.5 md:h-1 bg-gradient-to-r from-transparent via-red-200 to-transparent mt-1 md:mt-3 opacity-50 md:opacity-100"></div>
+                    </div>
+                </div>
             </div>
             
-            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col h-full">
-                <div class="flex items-center justify-between mb-4 border-b pb-2 border-slate-100">
-                    <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wide">Última Actividad</h2>
-                    <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full font-bold">Tiempo Real</span>
+            <!-- LISTA DE ACTIVIDAD -->
+            <div class="bg-white/80 backdrop-blur p-5 rounded-2xl shadow-soft border border-slate-200 flex flex-col h-64 lg:h-auto">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100">
+                    <h2 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fas fa-bolt text-yellow-400"></i> Actividad Reciente
+                    </h2>
+                    <span class="animate-pulse w-2 h-2 rounded-full bg-green-500"></span>
                 </div>
-                <ul id="recent-activity-list" class="space-y-2 overflow-y-auto max-h-48 custom-scrollbar flex-1 pr-1">
+                <ul id="recent-activity-list" class="space-y-3 overflow-y-auto custom-scrollbar flex-1 pr-1">
                     <li class="text-center text-slate-400 text-xs py-8 flex flex-col items-center animate-pulse">
-                        <i class="fas fa-circle-notch fa-spin mb-2 text-blue-400"></i>
+                        <i class="fas fa-circle-notch fa-spin mb-2 text-indigo-400 text-lg"></i>
                         Esperando datos...
                     </li>
                 </ul>
             </div>
         </section>
 
-        <div class="bg-white p-5 md:p-6 rounded-xl shadow-sm border border-slate-200">
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-                <h2 class="text-lg font-bold text-slate-800">Directorio de Socios</h2>
-                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                    <div class="relative">
-                        <i class="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"></i>
-                        <select id="filterInput" class="pl-9 pr-8 py-2 border border-slate-200 rounded-lg w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all appearance-none cursor-pointer hover:bg-white">
-                            <option value="all">Todos</option>
+        <!-- DIRECTORIO DE USUARIOS -->
+        <div class="bg-white rounded-3xl shadow-soft border border-slate-200 overflow-hidden">
+            <div class="p-6 md:p-8 border-b border-slate-100 flex flex-col lg:flex-row items-center justify-between gap-6 bg-gradient-to-r from-white to-slate-50/50">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-800">Directorio de Socios</h2>
+                    <p class="text-slate-400 text-sm mt-1">Administra accesos y puntos</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <div class="relative group">
+                        <i class="fas fa-filter absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 z-10 group-hover:text-indigo-500 transition-colors"></i>
+                        <select id="filterInput" class="pl-10 pr-10 py-2.5 border border-slate-200 rounded-xl w-full sm:w-44 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-white font-medium text-slate-600 shadow-sm transition-all appearance-none cursor-pointer hover:border-slate-300">
+                            <option value="all">Todos los estados</option>
                             <option value="Activo">Activos</option>
                             <option value="Inactivo">Inactivos</option>
                         </select>
-                        <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+                        <i class="fas fa-chevron-down absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
                     </div>
-                    <div class="relative w-full sm:w-auto">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2 border border-slate-200 rounded-lg w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-slate-50 transition-all">
+                    <div class="relative w-full sm:w-auto group">
+                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-indigo-500 transition-colors"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar por nombre..." class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm bg-white shadow-sm transition-all placeholder:text-slate-400 font-medium">
                     </div>
                 </div>
             </div>
-            <div class="overflow-x-auto rounded-lg border border-slate-100">
+
+            <div class="overflow-x-auto">
                 <table class="w-full text-sm text-left text-slate-500">
-                    <thead class="text-xs text-slate-700 uppercase bg-slate-50 border-b">
+                    <thead class="text-xs text-slate-400 font-bold uppercase bg-slate-50/80 border-b border-slate-100 tracking-wider">
                         <tr>
-                            <th class="px-6 py-4 font-semibold">Usuario</th>
-                            <th class="px-6 py-4 font-semibold">Estado</th>
-                            <th class="px-6 py-4 font-semibold">Puntos</th>
-                            <th class="px-6 py-4 text-center font-semibold">Acción</th>
+                            <th class="px-6 py-4 pl-8">Usuario</th>
+                            <th class="px-6 py-4">Estado</th>
+                            <th class="px-6 py-4">Puntos</th>
+                            <th class="px-6 py-4 text-center">Acción</th>
                         </tr>
                     </thead>
-                    <tbody id="users-table-body" class="divide-y divide-slate-100">
-                        <tr><td colspan="4" class="p-12 text-center text-slate-400 animate-pulse">Conectando con la base de datos...</td></tr>
+                    <tbody id="users-table-body" class="divide-y divide-slate-50">
+                        <tr><td colspan="4" class="p-16 text-center text-slate-400 animate-pulse font-medium">Conectando con la base de datos...</td></tr>
                     </tbody>
                 </table>
             </div>
+            <!-- Footer de tabla simple -->
+            <div class="bg-slate-50/50 p-4 border-t border-slate-100 text-center text-xs text-slate-400">
+                Mostrando resultados en tiempo real
+            </div>
         </div>
     </div>
 
-    <!-- MODAL PRINCIPAL -->
-    <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-50 modal-closed backdrop-blur-sm hidden transition-opacity duration-200">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg modal-content transform scale-95 transition-transform duration-200 flex flex-col max-h-[90vh]">
-            <div class="flex justify-between items-start p-6 border-b border-slate-100 bg-white rounded-t-2xl z-10 flex-shrink-0">
+    <!-- MODAL PRINCIPAL (Mismo diseño, no ha cambiado) -->
+    <div id="userDetailsModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 modal-closed hidden transition-all duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-lg modal-content transform scale-95 transition-all duration-300 flex flex-col max-h-[90vh] border border-white/50">
+            <div class="flex justify-between items-start p-6 pb-4 bg-white z-10 flex-shrink-0">
                 <div>
-                    <!-- Header dinámico -->
-                    <h3 class="text-xl font-bold text-slate-900 leading-tight" id="modal-header-display">...</h3>
-                    <p class="text-sm text-slate-500 mt-1">ID: <span id="modal-id" class="font-mono bg-slate-100 px-2 py-0.5 rounded text-slate-700 font-bold">...</span></p>
+                    <h3 class="text-2xl font-bold text-slate-800 leading-tight tracking-tight" id="modal-header-display">...</h3>
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ID:</span>
+                        <span id="modal-id" class="font-mono text-xs bg-slate-100 px-2 py-1 rounded text-slate-600 font-bold border border-slate-200">...</span>
+                    </div>
                 </div>
-                <div class="flex gap-2"><button id="toggleEditBtn" class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm"><i class="fas fa-pen mr-1.5"></i> Editar</button><button id="closeModalBtn" class="bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-full w-9 h-9 flex items-center justify-center transition-colors"><i class="fas fa-times text-lg"></i></button></div>
+                <div class="flex gap-2">
+                    <button id="toggleEditBtn" class="bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center">
+                        <i class="fas fa-pen mr-2"></i> Editar
+                    </button>
+                    <button id="closeModalBtn" class="bg-slate-50 hover:bg-slate-100 hover:text-slate-800 text-slate-400 rounded-full w-9 h-9 flex items-center justify-center transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
             </div>
-            <div class="p-6 overflow-y-auto custom-scrollbar flex-1" id="modal-form-container">
-                <div class="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border border-yellow-100 mb-6 flex justify-between items-center shadow-sm">
-                    <div><p class="text-[10px] font-bold text-yellow-600 uppercase mb-1 tracking-wider">Puntos Acumulados</p><div class="flex items-center gap-2"><i class="fas fa-trophy text-yellow-500 text-lg"></i><p id="modal-puntos-display" class="text-3xl font-bold text-slate-800">0</p></div></div>
-                    <div class="flex gap-1.5"><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-10">-10</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 font-bold shadow-sm point-btn transition-all" data-val="-1">-1</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="1">+1</button><button class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-green-600 hover:border-green-200 hover:bg-green-50 font-bold shadow-sm point-btn transition-all" data-val="10">+10</button></div>
+
+            <div class="px-6 pb-6 overflow-y-auto custom-scrollbar flex-1" id="modal-form-container">
+                <div class="bg-gradient-to-r from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-100/50 mb-6 flex justify-between items-center shadow-sm relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-orange-100 text-8xl opacity-50 pointer-events-none"><i class="fas fa-trophy"></i></div>
+                    <div class="relative z-10">
+                        <p class="text-[10px] font-bold text-amber-600/80 uppercase mb-1 tracking-widest">Puntos Acumulados</p>
+                        <div class="flex items-center gap-3">
+                            <i class="fas fa-trophy text-amber-400 text-xl drop-shadow-sm"></i>
+                            <p id="modal-puntos-display" class="text-4xl font-black text-slate-800 tracking-tight">0</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 relative z-10">
+                        <button class="w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 hover:shadow-md font-bold text-sm shadow-sm point-btn border border-slate-100" data-val="-10">-10</button>
+                        <button class="w-10 h-10 rounded-full bg-white text-slate-400 hover:text-red-500 hover:shadow-md font-bold text-sm shadow-sm point-btn border border-slate-100" data-val="-1">-1</button>
+                        <button class="w-10 h-10 rounded-full bg-white text-slate-400 hover:text-emerald-500 hover:shadow-md font-bold text-sm shadow-sm point-btn border border-slate-100" data-val="1">+1</button>
+                        <button class="w-10 h-10 rounded-full bg-white text-slate-400 hover:text-emerald-500 hover:shadow-md font-bold text-sm shadow-sm point-btn border border-slate-100" data-val="10">+10</button>
+                    </div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div class="bg-green-50 p-4 rounded-xl border border-green-200">
-                        <label class="text-xs font-bold text-green-800 uppercase tracking-wide flex items-center gap-1.5">
-                            <i class="fas fa-piggy-bank"></i> Saldo Mes Anterior
+                    <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100/60 hover:border-emerald-200 transition-colors group">
+                        <label class="text-[10px] font-bold text-emerald-700 uppercase tracking-widest flex items-center gap-1.5 mb-2 opacity-70 group-hover:opacity-100">
+                            <i class="fas fa-wallet"></i> Saldo Anterior
                         </label>
-                        <div class="flex items-center justify-between mt-2">
-                            <p id="modal-saldo-anterior" class="text-2xl font-bold text-slate-800">$0</p>
-                            <button id="openSaldoModalBtn" class="text-green-600 hover:text-green-800 font-bold text-sm">Editar</button>
+                        <div class="flex items-end justify-between">
+                            <p id="modal-saldo-anterior" class="text-xl font-bold text-slate-700">$0</p>
+                            <button id="openSaldoModalBtn" class="text-[10px] bg-white text-emerald-600 hover:text-emerald-700 font-bold px-2 py-1 rounded shadow-sm border border-emerald-100">MODIFICAR</button>
                         </div>
                     </div>
-                    <div class="bg-red-50 p-4 rounded-xl border border-red-200">
-                        <label class="text-xs font-bold text-red-800 uppercase tracking-wide flex items-center gap-1.5">
-                            <i class="fas fa-calendar-times"></i> Días de Ausencia
+                    <div class="bg-rose-50/50 p-4 rounded-2xl border border-rose-100/60 hover:border-rose-200 transition-colors group">
+                        <label class="text-[10px] font-bold text-rose-700 uppercase tracking-widest flex items-center gap-1.5 mb-2 opacity-70 group-hover:opacity-100">
+                            <i class="fas fa-calendar-times"></i> Ausencias
                         </label>
-                        <div class="flex items-center justify-between mt-2">
-                            <p id="modal-dias-ausencia" class="text-2xl font-bold text-slate-800">0 días</p>
-                            <button id="openAbsenceModalBtn" class="text-red-600 hover:text-red-800 font-bold text-sm">Gestionar</button>
+                        <div class="flex items-end justify-between">
+                            <p id="modal-dias-ausencia" class="text-xl font-bold text-slate-700">0 días</p>
+                            <button id="openAbsenceModalBtn" class="text-[10px] bg-white text-rose-600 hover:text-rose-700 font-bold px-2 py-1 rounded shadow-sm border border-rose-100">GESTIONAR</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 gap-5 mb-6">
-                    <!-- Inputs para Nombre y Apellido -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1">Nombre</label><input type="text" id="modal-nombre" class="editable-input" disabled></div>
-                        <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1">Apellido</label><input type="text" id="modal-apellido" class="editable-input" disabled></div>
+                <div class="space-y-5 mb-8">
+                    <div class="grid grid-cols-2 gap-5">
+                        <div class="group">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block group-hover:text-indigo-500 transition-colors">Nombre</label>
+                            <input type="text" id="modal-nombre" class="editable-input text-lg" disabled>
+                        </div>
+                        <div class="group">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block group-hover:text-indigo-500 transition-colors">Apellido</label>
+                            <input type="text" id="modal-apellido" class="editable-input text-lg" disabled>
+                        </div>
                     </div>
 
-                    <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-phone-alt"></i> Teléfono</label><input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar"></div>
-                    
-                    <!-- Select para Sección -->
-                    <div class="space-y-1">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-layer-group"></i> Sección</label>
-                        <select id="modal-seccion" class="editable-input" disabled>
-                            <option value="General">General</option>
-                            <option value="Mesas">Mesas</option>
-                            <option value="Máquinas">Máquinas</option>
-                            <option value="Bóveda">Bóveda</option>
-                            <option value="Técnicos">Técnicos</option>
-                            <option value="TGM">TGM</option>
-                        </select>
+                    <div class="grid grid-cols-2 gap-5">
+                        <div class="group">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block group-hover:text-indigo-500 transition-colors"><i class="fas fa-phone-alt mr-1"></i> Teléfono</label>
+                            <input type="text" id="modal-telefono" class="editable-input" disabled placeholder="Sin registrar">
+                        </div>
+                        <div class="group">
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block group-hover:text-indigo-500 transition-colors"><i class="fas fa-layer-group mr-1"></i> Sección</label>
+                            <select id="modal-seccion" class="editable-input cursor-pointer" disabled>
+                                <option value="General">General</option>
+                                <option value="Mesas">Mesas</option>
+                                <option value="Máquinas">Máquinas</option>
+                                <option value="Bóveda">Bóveda</option>
+                                <option value="Técnicos">Técnicos</option>
+                                <option value="TGM">TGM</option>
+                            </select>
+                        </div>
                     </div>
                     
-                    <div class="space-y-1"><label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1"><i class="fas fa-file-contract"></i> Contrato</label><input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado"></div>
+                    <div class="group">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 block group-hover:text-indigo-500 transition-colors"><i class="fas fa-file-contract mr-1"></i> Contrato</label>
+                        <input type="text" id="modal-contrato" class="editable-input" disabled placeholder="No especificado">
+                    </div>
                     
-                    <!-- Fecha de Ingreso Editable -->
-                    <div class="pt-3 border-t border-slate-100">
-                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide flex items-center gap-1 mb-2"><i class="far fa-calendar-alt"></i> Fecha de Ingreso</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="modal-dia" class="editable-input text-center w-16" placeholder="DD" disabled>
-                            <span class="text-slate-400 font-bold text-xl">/</span>
-                            <select id="modal-mes" class="editable-input" disabled>
+                    <div class="pt-4 border-t border-slate-100">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 mb-2"><i class="far fa-calendar-alt"></i> Fecha de Ingreso</label>
+                        <div class="flex gap-3 items-center">
+                            <input type="number" id="modal-dia" class="editable-input text-center w-14 bg-slate-50 rounded" placeholder="DD" disabled>
+                            <span class="text-slate-300 font-light text-2xl">/</span>
+                            <select id="modal-mes" class="editable-input bg-slate-50 rounded" disabled>
                                 <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
                             </select>
-                            <span class="text-slate-400 font-bold text-xl">/</span>
-                            <input type="number" id="modal-anio" class="editable-input text-center w-20" placeholder="AAAA" disabled>
+                            <span class="text-slate-300 font-light text-2xl">/</span>
+                            <input type="number" id="modal-anio" class="editable-input text-center w-20 bg-slate-50 rounded" placeholder="AAAA" disabled>
                         </div>
                     </div>
                 </div>
-                <button id="saveChangesBtn" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:bg-blue-700 hidden transform transition-all active:scale-95 mb-6"><i class="fas fa-save mr-2"></i> Guardar Cambios</button>
-                <div class="border-t border-slate-100 pt-5 mb-4">
-                    <h4 id="modal-history-title" class="text-sm font-bold text-slate-700 mb-3 flex items-center justify-between">
+
+                <button id="saveChangesBtn" class="w-full bg-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:shadow-xl hidden transform transition-all active:scale-95 mb-8 text-sm"><i class="fas fa-save mr-2"></i> Guardar Cambios</button>
+                
+                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 mb-6">
+                    <h4 id="modal-history-title" class="text-xs font-bold text-slate-700 mb-3 flex items-center justify-between uppercase tracking-wider">
                         <span class="flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Historial de Accesos</span>
                     </h4>
-                    <div class="bg-slate-50 rounded-lg border border-slate-200 overflow-hidden">
-                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200"><span>Fecha</span><span class="text-right">Hora</span></div>
-                        <ul id="modal-historial-lista" class="divide-y divide-slate-100 text-sm bg-white max-h-40 overflow-y-auto custom-scrollbar"><li class="p-4 text-center text-slate-400 italic text-xs">Cargando...</li></ul>
+                    <div class="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                        <div class="grid grid-cols-2 px-4 py-2 bg-slate-50 text-[10px] font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100"><span>Fecha</span><span class="text-right">Hora</span></div>
+                        <ul id="modal-historial-lista" class="divide-y divide-slate-50 text-sm bg-white max-h-32 overflow-y-auto custom-scrollbar"><li class="p-4 text-center text-slate-400 italic text-xs">Cargando...</li></ul>
                     </div>
-                    <p class="text-center text-xs text-slate-400 mt-2 italic">Mostrando últimos 20 registros</p>
                 </div>
-                <div class="border-t border-red-100 bg-red-50/50 rounded-xl p-4 mt-6"><h4 class="text-xs font-bold text-red-400 uppercase mb-2">Zona de Peligro</h4><button id="deleteUserBtn" class="w-full border border-red-200 bg-white text-red-600 hover:bg-red-50 font-bold py-2.5 rounded-lg text-sm transition-all shadow-sm hover:shadow flex items-center justify-center gap-2"><i class="fas fa-trash-alt"></i> Eliminar Usuario Permanentemente</button></div>
+
+                <div class="mt-8 pt-6 border-t border-dashed border-red-200">
+                    <button id="deleteUserBtn" class="w-full group flex items-center justify-center gap-2 text-red-400 hover:text-red-600 text-xs font-bold py-3 transition-all rounded-lg hover:bg-red-50">
+                        <i class="fas fa-trash-alt group-hover:scale-110 transition-transform"></i> Eliminar Usuario Permanentemente
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL PARA EDITAR SALDO -->
-    <div id="saldoModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[60] hidden">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
-            <div class="p-6 border-b">
+    <!-- MODAL SALDO (Sin cambios) -->
+    <div id="saldoModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[60] hidden transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm border border-white/50">
+            <div class="p-6 border-b border-slate-100 bg-slate-50/50 rounded-t-3xl">
                 <h3 class="text-lg font-bold text-slate-800">Editar Saldo Mes Anterior</h3>
+                <p class="text-xs text-slate-500 mt-1">Ingresa el monto sin puntos ni comas.</p>
             </div>
             <div class="p-6">
-                <label for="saldoInput" class="text-sm font-medium text-slate-600">Nuevo Monto</label>
-                <input type="number" id="saldoInput" class="mt-1 w-full border border-slate-300 rounded-lg p-3 text-lg" placeholder="0">
+                <div class="relative">
+                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                    <input type="number" id="saldoInput" class="w-full border border-slate-200 bg-slate-50 rounded-xl p-3 pl-8 text-2xl font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all" placeholder="0">
+                </div>
             </div>
-            <div class="p-4 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
-                <button id="cancelSaldoBtn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg">Cancelar</button>
-                <button id="saveSaldoBtn" class="bg-green-600 text-white font-bold py-2 px-4 rounded-lg">Guardar Saldo</button>
+            <div class="p-4 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button id="cancelSaldoBtn" class="text-slate-500 hover:bg-slate-200 font-bold py-2.5 px-5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button id="saveSaldoBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg shadow-emerald-200 text-sm transition-all transform active:scale-95">Guardar Saldo</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL PARA GESTIONAR AUSENCIAS -->
-    <div id="absenceModal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[60] hidden">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="p-6 border-b">
+    <!-- MODAL AUSENCIAS (Sin cambios) -->
+    <div id="absenceModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-[60] hidden transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-white/50">
+            <div class="p-6 border-b border-slate-100">
                 <h3 class="text-lg font-bold text-slate-800">Gestionar Ausencias</h3>
-                <p class="text-sm text-slate-500">Haz clic en los días para marcarlos/desmarcarlos.</p>
+                <p class="text-xs text-slate-500 mt-1">Haz clic en los días para marcar falta (Rojo).</p>
             </div>
             <div class="p-6">
-                <div id="calendar-header" class="flex justify-between items-center mb-4">
-                    <button id="prevMonthBtn" class="p-2 rounded-full hover:bg-slate-100">&lt;</button>
-                    <h4 id="monthYear" class="font-bold"></h4>
-                    <button id="nextMonthBtn" class="p-2 rounded-full hover:bg-slate-100">&gt;</button>
+                <div id="calendar-header" class="flex justify-between items-center mb-6">
+                    <button id="prevMonthBtn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors"><i class="fas fa-chevron-left"></i></button>
+                    <h4 id="monthYear" class="font-bold text-slate-800 capitalize text-lg"></h4>
+                    <button id="nextMonthBtn" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors"><i class="fas fa-chevron-right"></i></button>
                 </div>
                 <div id="calendar-container"></div>
             </div>
-            <div class="p-4 bg-slate-50 rounded-b-2xl flex justify-end gap-3">
-                <button id="cancelAbsenceBtn" class="bg-slate-200 text-slate-700 font-bold py-2 px-4 rounded-lg">Cancelar</button>
-                <button id="saveAbsenceBtn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg">Guardar Ausencias</button>
+            <div class="p-4 bg-slate-50 rounded-b-3xl flex justify-end gap-3">
+                <button id="cancelAbsenceBtn" class="text-slate-500 hover:bg-slate-200 font-bold py-2.5 px-5 rounded-xl text-sm transition-colors">Cancelar</button>
+                <button id="saveAbsenceBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-5 rounded-xl shadow-lg shadow-rose-200 text-sm transition-all transform active:scale-95">Guardar Cambios</button>
             </div>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- CONFIGURACIÓN ---
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
 
-        // --- ESTADO Y UI ---
         let state = { users: [], latestTimestamp: null, isFetching: false, currentUser: null, isEditing: false, calendarDate: new Date() };
         const ui = {
             tableBody: document.getElementById('users-table-body'),
@@ -280,6 +403,11 @@
             },
             searchInput: document.getElementById('searchInput'),
             filterInput: document.getElementById('filterInput'),
+            cards: {
+                total: document.getElementById('card-total'),
+                active: document.getElementById('card-active'),
+                inactive: document.getElementById('card-inactive')
+            },
             counters: { total: document.getElementById('total-users'), active: document.getElementById('active-users'), inactive: document.getElementById('inactive-users') },
             activityList: document.getElementById('recent-activity-list'),
             toastContainer: document.getElementById('toast-container'),
@@ -287,35 +415,17 @@
             statusBadge: document.getElementById('status-badge'),
             pingAnimate: document.getElementById('ping-animate'),
             pingStatic: document.getElementById('ping-static'),
-            saldoModal: {
-                el: document.getElementById('saldoModal'),
-                input: document.getElementById('saldoInput'),
-                saveBtn: document.getElementById('saveSaldoBtn'),
-                cancelBtn: document.getElementById('cancelSaldoBtn'),
-                openBtn: document.getElementById('openSaldoModalBtn')
-            },
-            absenceModal: {
-                el: document.getElementById('absenceModal'),
-                calendarContainer: document.getElementById('calendar-container'),
-                monthYear: document.getElementById('monthYear'),
-                prevBtn: document.getElementById('prevMonthBtn'),
-                nextBtn: document.getElementById('nextMonthBtn'),
-                saveBtn: document.getElementById('saveAbsenceBtn'),
-                cancelBtn: document.getElementById('cancelAbsenceBtn'),
-                openBtn: document.getElementById('openAbsenceModalBtn')
-            }
+            saldoModal: { el: document.getElementById('saldoModal'), input: document.getElementById('saldoInput'), saveBtn: document.getElementById('saveSaldoBtn'), cancelBtn: document.getElementById('cancelSaldoBtn'), openBtn: document.getElementById('openSaldoModalBtn') },
+            absenceModal: { el: document.getElementById('absenceModal'), calendarContainer: document.getElementById('calendar-container'), monthYear: document.getElementById('monthYear'), prevBtn: document.getElementById('prevMonthBtn'), nextBtn: document.getElementById('nextMonthBtn'), saveBtn: document.getElementById('saveAbsenceBtn'), cancelBtn: document.getElementById('cancelAbsenceBtn'), openBtn: document.getElementById('openAbsenceModalBtn') }
         };
 
         const safe = str => str ? String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])) : '';
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
         const timeAgo = d => { if(!d)return'';const s=Math.floor((new Date()-d)/1000);return s<60?'ahora':s<3600?`${Math.floor(s/60)} min`:`${Math.floor(s/3600)} h`; };
         
-        // [NUEVO] Función para normalizar fechas al formato AAAA-MM-DD
         function normalizarFecha(fechaInput) {
             if (!fechaInput) return null;
-            if (typeof fechaInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaInput)) {
-                return fechaInput;
-            }
+            if (typeof fechaInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaInput)) { return fechaInput; }
             const d = new Date(fechaInput);
             if (isNaN(d.getTime())) return fechaInput; 
             const year = d.getFullYear();
@@ -325,9 +435,9 @@
         }
 
         const setStatus = (status) => {
-            if(status === 'loading') { ui.statusText.textContent = 'Actualizando...'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-yellow-500'; } 
-            else if(status === 'success') { ui.statusText.textContent = 'En línea'; ui.statusText.className = 'text-xs font-bold text-green-700'; ui.statusBadge.className = 'flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full shadow-sm border border-green-200 w-fit'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500'; ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75'; } 
-            else { ui.statusText.textContent = 'Sin conexión'; ui.statusText.className = 'text-xs font-bold text-red-700'; ui.statusBadge.className = 'flex items-center gap-2 bg-red-50 px-3 py-1.5 rounded-full shadow-sm border border-red-200 w-fit'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500'; ui.pingAnimate.className = 'hidden'; }
+            if(status === 'loading') { ui.statusText.textContent = 'Actualizando...'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-indigo-500'; } 
+            else if(status === 'success') { ui.statusText.textContent = 'EN LÍNEA'; ui.statusText.className = 'text-xs font-bold text-emerald-600'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-emerald-500'; ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'; } 
+            else { ui.statusText.textContent = 'SIN CONEXIÓN'; ui.statusText.className = 'text-xs font-bold text-red-600'; ui.pingStatic.className = 'relative inline-flex rounded-full h-3 w-3 bg-red-500'; ui.pingAnimate.className = 'hidden'; }
         };
 
         const fetchData = async () => {
@@ -338,19 +448,12 @@
                 const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now());
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const data = await response.json();
-                
-                if (!Array.isArray(data)) {
-                    throw new Error("La respuesta del servidor no es una lista de usuarios válida.");
-                }
-
+                if (!Array.isArray(data)) throw new Error("La respuesta del servidor no es una lista de usuarios válida.");
                 state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
-                
                 if (state.users.length > 0) {
                     const newest = state.users[0];
                     if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp && parseDate(newest.Timestamp) > parseDate(state.latestTimestamp)) {
-                        if(newest.Estado === 'Activo') {
-                           showToast(newest);
-                        }
+                        if(newest.Estado === 'Activo') showToast(newest);
                     }
                     state.latestTimestamp = newest.Timestamp;
                 }
@@ -374,7 +477,7 @@
             } catch(e) {
                 console.error("Error en fetchData:", e);
                 setStatus('error');
-                ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50">Error de conexión o datos inválidos. Revisa la consola.</td></tr>`;
+                ui.tableBody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-red-500 bg-red-50 font-medium">Error de conexión. Intentando reconectar...</td></tr>`;
             } finally {
                 state.isFetching = false;
             }
@@ -407,22 +510,20 @@
                 const initials = (safe(u.Nombre ? u.Nombre[0] : '') + safe(u.Apellido ? u.Apellido[0] : '')).toUpperCase();
                 const lastSeen = parseDate(u.Timestamp);
                 const minutesAgo = lastSeen ? (new Date() - lastSeen) / 1000 / 60 : Infinity;
-                let statusTextHtml = '';
-                let statusDotClass = '';
-                let showKickButton = false;
+                let statusTextHtml = '', statusDotClass = '', showKickButton = false;
                 if (u.Estado === 'Inactivo') {
-                    statusTextHtml = `<span class="text-red-600 font-semibold">Bloqueado</span>`;
-                    statusDotClass = 'bg-red-500';
+                    statusTextHtml = `<span class="text-red-500 font-bold">Bloqueado</span>`;
+                    statusDotClass = 'bg-red-500 shadow-sm shadow-red-300';
                 } else if (u.Estado === 'KICK') {
-                    statusTextHtml = `<span class="text-yellow-600 font-bold italic">Cerrando...</span>`;
-                    statusDotClass = 'bg-yellow-400 animate-pulse';
+                    statusTextHtml = `<span class="text-amber-500 font-bold italic">Cerrando...</span>`;
+                    statusDotClass = 'bg-amber-400 animate-pulse';
                 } else if (u.Estado === 'Activo') {
                     if (minutesAgo < 12) {
-                        statusTextHtml = `<span class="text-green-600 font-bold">En Línea</span>`;
-                        statusDotClass = 'bg-green-500 animate-pulse';
+                        statusTextHtml = `<span class="text-emerald-600 font-bold">En Línea</span>`;
+                        statusDotClass = 'bg-emerald-500 animate-pulse shadow-sm shadow-emerald-300';
                         showKickButton = true;
                     } else {
-                        statusTextHtml = `<span class="text-orange-500 font-semibold">Ausente / Sin cerrar</span>`;
+                        statusTextHtml = `<span class="text-orange-500 font-bold">Ausente</span>`;
                         statusDotClass = 'bg-orange-400';
                         showKickButton = true;
                     }
@@ -430,8 +531,8 @@
                     statusTextHtml = `<span class="text-slate-400 font-semibold">Desconectado</span>`;
                     statusDotClass = 'bg-slate-300';
                 }
-                const kickBtnHtml = showKickButton ? `<button class="btn-kick ml-2 text-slate-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50" title="Cerrar sesión" data-id="${u['ID de Usuario']}"><i class="fas fa-power-off"></i></button>` : '';
-                ui.activityList.innerHTML += `<li class="relative flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 transition-all duration-200 group cursor-default"><div class="relative flex-shrink-0"><div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs border border-slate-200 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">${initials}</div><span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${statusDotClass}"></span></div><div class="flex-1 min-w-0"><p class="text-sm font-bold text-slate-800 truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</p><p class="text-[11px] text-slate-500 truncate">${statusTextHtml}</p></div><div class="flex items-center gap-1"><div class="text-[10px] font-medium text-slate-400 whitespace-nowrap bg-slate-50 px-2 py-1 rounded">${timeAgo(lastSeen)}</div>${kickBtnHtml}</div></li>`;
+                const kickBtnHtml = showKickButton ? `<button class="btn-kick ml-auto text-slate-300 hover:text-red-500 transition-colors p-2 rounded-full hover:bg-red-50" title="Cerrar sesión" data-id="${u['ID de Usuario']}"><i class="fas fa-power-off"></i></button>` : '';
+                ui.activityList.innerHTML += `<li class="relative flex items-center gap-3 p-3 rounded-xl hover:bg-white/60 hover:shadow-sm border border-transparent hover:border-slate-100 transition-all duration-200 group cursor-default"><div class="relative flex-shrink-0"><div class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs border border-white shadow-sm group-hover:from-indigo-100 group-hover:to-indigo-200 group-hover:text-indigo-600 transition-all">${initials}</div><span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${statusDotClass}"></span></div><div class="flex-1 min-w-0"><p class="text-sm font-bold text-slate-700 truncate group-hover:text-indigo-900 transition-colors">${safe(u.Nombre)} ${safe(u.Apellido)}</p><p class="text-[11px] text-slate-500 truncate">${statusTextHtml} <span class="text-slate-300 mx-1">•</span> <span class="text-[10px] font-medium text-slate-400">${timeAgo(lastSeen)}</span></p></div>${kickBtnHtml}</li>`;
             });
             document.querySelectorAll('.btn-kick').forEach(btn => {
                 btn.addEventListener('click', (e) => { e.stopPropagation(); kickUser(btn); });
@@ -447,19 +548,23 @@
                 const matchesStatus = filterStatus === 'all' || (filterStatus === 'Activo' && isConsideredActive) || (filterStatus === 'Inactivo' && !isConsideredActive);
                 return matchesSearch && matchesStatus;
             });
-            ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400">Sin resultados</td></tr>';
+            ui.tableBody.innerHTML = list.length ? '' : '<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">No se encontraron resultados</td></tr>';
             list.forEach(u => {
                 const isBlocked = u.Estado === 'Inactivo';
                 const isOffline = u.Estado === 'Desconectado' || u.Estado === 'KICK';
-                let badgeClass = 'badge-active'; let badgeText = 'Permitido'; let badgeIcon = '<i class="fas fa-check mr-1.5"></i>';
-                let actionBtn = `<button class="btn btn-red text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Inactivo">Bloquear</button>`;
+                let badgeClass = 'badge-active', badgeText = 'Activo', badgeIcon = '<i class="fas fa-check-circle mr-1.5"></i>';
+                let actionBtn = `<button class="btn btn-red text-xs btn-status" data-id="${u['ID de Usuario']}" data-status="Inactivo"><i class="fas fa-ban"></i> Bloquear</button>`;
                 if (isBlocked) {
                     badgeClass = 'badge-inactive'; badgeText = 'Bloqueado'; badgeIcon = '<i class="fas fa-ban mr-1.5"></i>';
-                    actionBtn = `<button class="btn btn-green text-xs btn-status shadow-sm hover:shadow-md" data-id="${u['ID de Usuario']}" data-status="Activo">Desbloquear</button>`;
+                    actionBtn = `<button class="btn btn-green text-xs btn-status" data-id="${u['ID de Usuario']}" data-status="Activo"><i class="fas fa-unlock"></i> Habilitar</button>`;
                 } else if (isOffline) {
-                    badgeClass = 'badge-offline'; badgeText = 'Desconectado'; badgeIcon = '<i class="fas fa-power-off mr-1.5"></i>';
+                    badgeClass = 'badge-offline'; badgeText = 'Offline'; badgeIcon = '<i class="fas fa-power-off mr-1.5"></i>';
                 }
-                ui.tableBody.innerHTML += `<tr class="bg-white hover:bg-slate-50 border-b cursor-pointer tr-user transition-colors group" data-id="${u['ID de Usuario']}"><td class="px-6 py-4 flex gap-3 font-medium text-slate-900 items-center"><div class="w-8 h-8 rounded-full bg-slate-200 group-hover:bg-blue-100 group-hover:text-blue-600 text-xs font-bold text-slate-500 flex items-center justify-center">${safe(u.Nombre ? u.Nombre[0] : '?')}${safe(u.Apellido ? u.Apellido[0] : '?')}</div>${safe(u.Nombre)} ${safe(u.Apellido)}</td><td class="px-6 py-4"><span class="badge ${badgeClass}">${badgeIcon}${badgeText}</span></td><td class="px-6 py-4 font-bold text-yellow-600"><div class="flex items-center gap-1"><i class="fas fa-star text-xs text-yellow-400"></i>${u.Puntos||0}</div></td><td class="px-6 py-4 text-center">${actionBtn}</td></tr>`;
+                const colors = ['bg-blue-100 text-blue-600', 'bg-indigo-100 text-indigo-600', 'bg-purple-100 text-purple-600', 'bg-pink-100 text-pink-600', 'bg-orange-100 text-orange-600', 'bg-teal-100 text-teal-600'];
+                const colorIndex = (u.Nombre ? u.Nombre.length : 0) % colors.length;
+                const avatarClass = colors[colorIndex];
+
+                ui.tableBody.innerHTML += `<tr class="bg-white border-b border-slate-50 cursor-pointer tr-user group" data-id="${u['ID de Usuario']}"><td class="px-6 py-4 flex gap-4 font-semibold text-slate-700 items-center"><div class="w-10 h-10 rounded-xl ${avatarClass} text-xs font-bold flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">${safe(u.Nombre ? u.Nombre[0] : '?')}${safe(u.Apellido ? u.Apellido[0] : '?')}</div><div><p class="text-sm font-bold text-slate-800">${safe(u.Nombre)} ${safe(u.Apellido)}</p><p class="text-[10px] text-slate-400 uppercase tracking-wide">${u.Sección || 'General'}</p></div></td><td class="px-6 py-4"><span class="badge ${badgeClass}">${badgeIcon}${badgeText}</span></td><td class="px-6 py-4"><div class="flex items-center gap-1.5 font-bold text-amber-500 bg-amber-50 w-fit px-3 py-1 rounded-full border border-amber-100"><i class="fas fa-star text-xs"></i>${u.Puntos||0}</div></td><td class="px-6 py-4 text-center">${actionBtn}</td></tr>`;
             });
         };
 
@@ -468,9 +573,9 @@
         const showToast = (msg, type = 'info') => {
             const toast = document.createElement('div');
             toast.className = 'toast';
-            const icon = type === 'error' ? '<i class="fas fa-exclamation-circle text-red-500 text-xl"></i>' : (msg.Nombre ? '<i class="fas fa-user-check text-green-500 text-xl"></i>' : '<i class="fas fa-check-circle text-green-500 text-xl"></i>');
-            const title = msg.Nombre ? 'Nuevo Ingreso' : (type === 'error' ? 'Error' : 'Éxito');
-            const text = msg.Nombre ? `${msg.Nombre} ${msg.Apellido}` : msg;
+            const icon = type === 'error' ? '<i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>' : (msg.Nombre ? '<i class="fas fa-user-check text-emerald-500 text-2xl"></i>' : '<i class="fas fa-check-circle text-emerald-500 text-2xl"></i>');
+            const title = msg.Nombre ? 'Acceso Registrado' : (type === 'error' ? 'Error' : 'Operación Exitosa');
+            const text = msg.Nombre ? `${msg.Nombre} ${msg.Apellido} ha ingresado.` : msg;
             toast.innerHTML = `${icon}<div><h4 class="font-bold text-sm text-slate-800">${title}</h4><p class="text-xs text-slate-500">${text}</p></div>`;
             ui.toastContainer.appendChild(toast);
             requestAnimationFrame(() => toast.classList.add('show'));
@@ -531,7 +636,6 @@
             state.isEditing = false;
             updateEditModeUI();
             const m = ui.modal;
-            
             m.headerDisplay.textContent = `${user.Nombre} ${user.Apellido}`;
             m.nombre.value = user.Nombre || '';
             m.apellido.value = user.Apellido || '';
@@ -540,58 +644,44 @@
             m.section.value = user.Sección || 'General';
             m.contract.value = user['Tipo de Contrato'] || '';
             m.points.textContent = user.Puntos || 0;
-            
             m.dia.value = user['Día de Ingreso'] || '';
             m.mes.value = user['Mes de Ingreso'] || 'Enero';
             m.anio.value = user['Año de Ingreso'] || '';
-            
             m.saldo.textContent = `$${(user.SaldoAnterior || 0).toLocaleString('es-CL')}`;
             const absenceCount = Array.isArray(user.DiasAusencia) ? user.DiasAusencia.length : 0;
             m.ausencias.textContent = `${absenceCount} día${absenceCount !== 1 ? 's' : ''}`;
-
             const totalVisitas = user.Historial ? user.Historial.length : 0;
-            m.historyTitle.innerHTML = `<span class="flex items-center gap-2"><i class="fas fa-history text-slate-400"></i> Historial de Accesos</span> <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">Total: ${totalVisitas}</span>`;
-
+            m.historyTitle.innerHTML = `<span class="flex items-center gap-2"><i class="fas fa-history text-indigo-400"></i> Historial de Accesos</span> <span class="bg-indigo-50 text-indigo-600 text-[10px] px-2 py-0.5 rounded-lg font-bold border border-indigo-100">Total: ${totalVisitas}</span>`;
             m.history.innerHTML = '';
             if(user.Historial && user.Historial.length){
                 user.Historial.slice(0, 20).forEach(h => {
                     const d = new Date(h);
-                    const fechaStr = d.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'});
-                    const horaStr = d.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit', second:'2-digit'});
-                    m.history.innerHTML += `<li class="px-4 py-3 flex justify-between items-center hover:bg-slate-50 border-b border-slate-50 last:border-0"><span class="text-slate-700 font-medium text-sm">${fechaStr}</span><span class="font-mono text-slate-500 text-xs bg-slate-100 px-2 py-1 rounded">${horaStr} hrs</span></li>`;
+                    m.history.innerHTML += `<li class="px-4 py-3 flex justify-between items-center hover:bg-slate-50 border-b border-slate-50 last:border-0"><span class="text-slate-600 font-semibold text-xs">${d.toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'})}</span><span class="font-mono text-slate-500 text-[10px] bg-slate-100 px-2 py-1 rounded border border-slate-200">${d.toLocaleTimeString('es-CL', {hour: '2-digit', minute:'2-digit', second:'2-digit'})} hrs</span></li>`;
                 });
-            } else {
-                m.history.innerHTML = '<li class="p-8 text-center text-slate-400 text-sm">Sin historial</li>';
-            }
+            } else { m.history.innerHTML = '<li class="p-8 text-center text-slate-400 text-xs italic">Sin historial registrado</li>'; }
             m.el.classList.remove('hidden', 'modal-closed');
             m.el.classList.add('modal-open');
             m.content.classList.remove('scale-95');
         };
 
         const closeModal = () => { ui.modal.el.classList.add('modal-closed'); ui.modal.content.classList.add('scale-95'); setTimeout(() => ui.modal.el.classList.add('hidden'), 200); state.currentUser = null; };
-        
-        const toggleEditMode = () => { 
-            state.isEditing = !state.isEditing; 
-            updateEditModeUI(); 
-        };
+        const toggleEditMode = () => { state.isEditing = !state.isEditing; updateEditModeUI(); };
 
         const updateEditModeUI = () => {
             const m = ui.modal;
             const fields = [m.nombre, m.apellido, m.phone, m.section, m.contract, m.dia, m.mes, m.anio];
-            
             if(state.isEditing) {
                 m.container.classList.add('is-editing');
                 fields.forEach(el => el.disabled = false);
                 m.saveBtn.classList.remove('hidden');
-                m.editBtn.innerHTML = '<i class="fas fa-times mr-1.5"></i> Cancelar';
-                m.editBtn.className = 'bg-red-50 text-red-600 hover:bg-red-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm';
+                m.editBtn.innerHTML = '<i class="fas fa-times mr-2"></i> Cancelar';
+                m.editBtn.className = 'bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center';
             } else {
                 m.container.classList.remove('is-editing');
                 fields.forEach(el => el.disabled = true);
                 m.saveBtn.classList.add('hidden');
-                m.editBtn.innerHTML = '<i class="fas fa-pen mr-1.5"></i> Editar';
-                m.editBtn.className = 'bg-blue-50 text-blue-600 hover:bg-blue-100 px-3 py-2 rounded-lg text-sm font-bold transition-colors flex items-center shadow-sm';
-                
+                m.editBtn.innerHTML = '<i class="fas fa-pen mr-2"></i> Editar';
+                m.editBtn.className = 'bg-white border border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center';
                 if(state.currentUser) {
                     m.nombre.value = state.currentUser.Nombre || '';
                     m.apellido.value = state.currentUser.Apellido || '';
@@ -608,176 +698,68 @@
             const m = ui.modal;
             m.saveBtn.disabled = true;
             m.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Guardando...';
-
-            const payload = {
-                action: 'editUser',
-                id: state.currentUser['ID de Usuario'],
-                nombre: m.nombre.value,
-                apellido: m.apellido.value,
-                telefono: m.phone.value,
-                seccion: m.section.value,
-                contrato: m.contract.value,
-                dia: m.dia.value,
-                mes: m.mes.value,
-                anio: m.anio.value
-            };
-
+            const payload = { action: 'editUser', id: state.currentUser['ID de Usuario'], nombre: m.nombre.value, apellido: m.apellido.value, telefono: m.phone.value, seccion: m.section.value, contrato: m.contract.value, dia: m.dia.value, mes: m.mes.value, anio: m.anio.value };
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-                
-                state.currentUser.Nombre = payload.nombre;
-                state.currentUser.Apellido = payload.apellido;
-                state.currentUser.Teléfono = payload.telefono;
-                state.currentUser.Sección = payload.seccion;
-                state.currentUser['Tipo de Contrato'] = payload.contrato;
-                state.currentUser['Día de Ingreso'] = payload.dia;
-                state.currentUser['Mes de Ingreso'] = payload.mes;
-                state.currentUser['Año de Ingreso'] = payload.anio;
-                
+                Object.assign(state.currentUser, { Nombre: payload.nombre, Apellido: payload.apellido, Teléfono: payload.telefono, Sección: payload.seccion, 'Tipo de Contrato': payload.contrato, 'Día de Ingreso': payload.dia, 'Mes de Ingreso': payload.mes, 'Año de Ingreso': payload.anio });
                 m.headerDisplay.textContent = `${payload.nombre} ${payload.apellido}`;
                 showToast('Cambios guardados', 'success');
                 toggleEditMode();
                 fetchData(); 
-            } catch(e) {
-                alert('Error al guardar: ' + e.message);
-            } finally {
-                m.saveBtn.disabled = false;
-                m.saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Guardar Cambios';
-            }
+            } catch(e) { alert('Error al guardar: ' + e.message); } 
+            finally { m.saveBtn.disabled = false; m.saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Guardar Cambios'; }
         };
 
-        // Lógica para el modal de Saldo
-        ui.saldoModal.openBtn.addEventListener('click', () => {
-            if (!state.currentUser) return;
-            ui.saldoModal.input.value = state.currentUser.SaldoAnterior || 0;
-            ui.saldoModal.el.classList.remove('hidden');
-        });
+        ui.saldoModal.openBtn.addEventListener('click', () => { if (!state.currentUser) return; ui.saldoModal.input.value = state.currentUser.SaldoAnterior || 0; ui.saldoModal.el.classList.remove('hidden'); });
         ui.saldoModal.cancelBtn.addEventListener('click', () => ui.saldoModal.el.classList.add('hidden'));
         ui.saldoModal.saveBtn.addEventListener('click', async () => {
             const amount = parseFloat(ui.saldoModal.input.value);
             if (isNaN(amount)) return;
-            const btn = ui.saldoModal.saveBtn;
-            btn.disabled = true; btn.textContent = 'Guardando...';
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount: amount })
-                });
-                state.currentUser.SaldoAnterior = amount;
-                ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`;
-                showToast('Saldo actualizado', 'success');
-                ui.saldoModal.el.classList.add('hidden');
-            } catch (e) {
-                showToast('Error al guardar', 'error');
-            } finally {
-                btn.disabled = false; btn.textContent = 'Guardar Saldo';
-            }
+            const btn = ui.saldoModal.saveBtn; btn.disabled = true; btn.textContent = 'Guardando...';
+            try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount: amount }) }); state.currentUser.SaldoAnterior = amount; ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`; showToast('Saldo actualizado', 'success'); ui.saldoModal.el.classList.add('hidden'); } catch (e) { showToast('Error al guardar', 'error'); } finally { btn.disabled = false; btn.textContent = 'Guardar Saldo'; }
         });
 
-        // Lógica para el modal de Ausencias
-        ui.absenceModal.openBtn.addEventListener('click', () => {
-            if (!state.currentUser) return;
-            state.calendarDate = new Date();
-            renderAbsenceCalendar();
-            ui.absenceModal.el.classList.remove('hidden');
-        });
+        ui.absenceModal.openBtn.addEventListener('click', () => { if (!state.currentUser) return; state.calendarDate = new Date(); renderAbsenceCalendar(); ui.absenceModal.el.classList.remove('hidden'); });
         ui.absenceModal.cancelBtn.addEventListener('click', () => ui.absenceModal.el.classList.add('hidden'));
-        ui.absenceModal.prevBtn.addEventListener('click', () => {
-            state.calendarDate.setMonth(state.calendarDate.getMonth() - 1);
-            renderAbsenceCalendar();
-        });
-        ui.absenceModal.nextBtn.addEventListener('click', () => {
-            state.calendarDate.setMonth(state.calendarDate.getMonth() + 1);
-            renderAbsenceCalendar();
-        });
+        ui.absenceModal.prevBtn.addEventListener('click', () => { state.calendarDate.setMonth(state.calendarDate.getMonth() - 1); renderAbsenceCalendar(); });
+        ui.absenceModal.nextBtn.addEventListener('click', () => { state.calendarDate.setMonth(state.calendarDate.getMonth() + 1); renderAbsenceCalendar(); });
         ui.absenceModal.saveBtn.addEventListener('click', async () => {
             const markedDays = Array.from(ui.absenceModal.calendarContainer.querySelectorAll('.day.absent')).map(d => d.dataset.date);
-            const btn = ui.absenceModal.saveBtn;
-            btn.disabled = true; btn.textContent = 'Guardando...';
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'updateAbsences', id: state.currentUser['ID de Usuario'], dates: markedDays })
-                });
-                state.currentUser.DiasAusencia = markedDays;
-                ui.modal.ausencias.textContent = `${markedDays.length} día${markedDays.length !== 1 ? 's' : ''}`;
-                showToast('Ausencias actualizadas', 'success');
-                ui.absenceModal.el.classList.add('hidden');
-            } catch (e) {
-                showToast('Error al guardar', 'error');
-            } finally {
-                btn.disabled = false; btn.textContent = 'Guardar Ausencias';
-            }
+            const btn = ui.absenceModal.saveBtn; btn.disabled = true; btn.textContent = 'Guardando...';
+            try { await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateAbsences', id: state.currentUser['ID de Usuario'], dates: markedDays }) }); state.currentUser.DiasAusencia = markedDays; ui.modal.ausencias.textContent = `${markedDays.length} día${markedDays.length !== 1 ? 's' : ''}`; showToast('Ausencias actualizadas', 'success'); ui.absenceModal.el.classList.add('hidden'); } catch (e) { showToast('Error al guardar', 'error'); } finally { btn.disabled = false; btn.textContent = 'Guardar Cambios'; }
         });
         
         function renderAbsenceCalendar() {
-            const year = state.calendarDate.getFullYear();
-            const month = state.calendarDate.getMonth();
-            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            ui.absenceModal.monthYear.textContent = `${monthNames[month]} ${year}`;
-            
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const daysInMonth = lastDay.getDate();
-            const startingDay = (firstDay.getDay() + 6) % 7;
-            
+            const year = state.calendarDate.getFullYear(); const month = state.calendarDate.getMonth();
+            ui.absenceModal.monthYear.textContent = `${["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"][month]} ${year}`;
+            const firstDay = new Date(year, month, 1); const lastDay = new Date(year, month + 1, 0); const daysInMonth = lastDay.getDate(); const startingDay = (firstDay.getDay() + 6) % 7;
             let html = '<div class="calendar-grid">';
             ["Lu", "Ma", "Mi", "Ju", "Vi", "Sa", "Do"].forEach(d => html += `<div class="day-name">${d}</div>`);
             for (let i = 0; i < startingDay; i++) html += `<div class="day empty"></div>`;
-            
-            // [CORREGIDO] Normalización de fechas para el Set
             const markedDays = new Set((state.currentUser.DiasAusencia || []).map(normalizarFecha));
-
             for (let i = 1; i <= daysInMonth; i++) {
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                // [CORREGIDO] Chequeo usando la misma normalización
-                const isMarked = markedDays.has(dateStr);
-                html += `<div class="day ${isMarked ? 'absent' : ''}" data-date="${dateStr}">${i}</div>`;
+                html += `<div class="day ${markedDays.has(dateStr) ? 'absent' : ''}" data-date="${dateStr}">${i}</div>`;
             }
             html += `</div>`;
             ui.absenceModal.calendarContainer.innerHTML = html;
-
-            // [CORREGIDO] Toggle robusto (quitar y poner)
-            ui.absenceModal.calendarContainer.querySelectorAll('.day:not(.empty)').forEach(dayEl => {
-                dayEl.addEventListener('click', () => {
-                    if (dayEl.classList.contains('absent')) {
-                        dayEl.classList.remove('absent');
-                    } else {
-                        dayEl.classList.add('absent');
-                    }
-                });
-            });
+            ui.absenceModal.calendarContainer.querySelectorAll('.day:not(.empty)').forEach(dayEl => { dayEl.addEventListener('click', () => { dayEl.classList.toggle('absent'); }); });
         }
 
-        const notificarCierre = () => { /* ... */ };
-        window.addEventListener('pagehide', notificarCierre);
-
-        ui.modal.nombre.addEventListener('input', () => {
-            ui.modal.headerDisplay.textContent = `${ui.modal.nombre.value} ${ui.modal.apellido.value}`;
-        });
-        ui.modal.apellido.addEventListener('input', () => {
-            ui.modal.headerDisplay.textContent = `${ui.modal.nombre.value} ${ui.modal.apellido.value}`;
-        });
-
+        ui.modal.nombre.addEventListener('input', () => { ui.modal.headerDisplay.textContent = `${ui.modal.nombre.value} ${ui.modal.apellido.value}`; });
+        ui.modal.apellido.addEventListener('input', () => { ui.modal.headerDisplay.textContent = `${ui.modal.nombre.value} ${ui.modal.apellido.value}`; });
         ui.searchInput.addEventListener('input', () => setTimeout(renderTable, 300));
         ui.filterInput.addEventListener('change', renderTable);
-        ui.tableBody.addEventListener('click', e => {
-            e.stopPropagation();
-            if(e.target.closest('.btn-status')) {
-                toggleStatus(e.target.closest('.btn-status'));
-            } else if(e.target.closest('.tr-user')) {
-                const user = state.users.find(u => u['ID de Usuario'] == e.target.closest('.tr-user').dataset.id);
-                if(user) openModal(user);
-            }
-        });
-        ui.modal.closeBtn.addEventListener('click', closeModal);
-        ui.modal.editBtn.addEventListener('click', toggleEditMode);
-        ui.modal.saveBtn.addEventListener('click', saveUserChanges);
-        ui.modal.deleteBtn.addEventListener('click', deleteUser);
+        ui.tableBody.addEventListener('click', e => { e.stopPropagation(); if(e.target.closest('.btn-status')) toggleStatus(e.target.closest('.btn-status')); else if(e.target.closest('.tr-user')) { const user = state.users.find(u => u['ID de Usuario'] == e.target.closest('.tr-user').dataset.id); if(user) openModal(user); } });
+        ui.modal.closeBtn.addEventListener('click', closeModal); ui.modal.editBtn.addEventListener('click', toggleEditMode); ui.modal.saveBtn.addEventListener('click', saveUserChanges); ui.modal.deleteBtn.addEventListener('click', deleteUser);
         document.querySelectorAll('.point-btn').forEach(btn => btn.addEventListener('click', () => updatePoints(parseInt(btn.dataset.val))));
 
-        fetchData(); 
-        setInterval(fetchData, 10000);
+        // --- NUEVA LÓGICA: FILTRAR AL HACER CLIC EN LAS TARJETAS ---
+        ui.cards.total.addEventListener('click', () => { ui.filterInput.value = 'all'; renderTable(); });
+        ui.cards.active.addEventListener('click', () => { ui.filterInput.value = 'Activo'; renderTable(); });
+        ui.cards.inactive.addEventListener('click', () => { ui.filterInput.value = 'Inactivo'; renderTable(); });
+
+        fetchData(); setInterval(fetchData, 10000);
     });
     </script>
 </body>
