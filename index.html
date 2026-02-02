@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel de Gestión de Usuarios</title>
+    <title>SocioFlow | Panel de Gestión</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -13,7 +13,7 @@
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { primary: '#4f46e5', secondary: '#64748b' }
+                    colors: { primary: '#4f46e5', success: '#10b981', danger: '#ef4444' }
                 }
             }
         }
@@ -27,45 +27,27 @@
             color: #334155;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        /* Badges */
-        .badge { display: inline-flex; align-items: center; padding: 0.35em 0.8em; font-size: 0.70rem; font-weight: 700; border-radius: 9999px; letter-spacing: 0.025em; }
+        .badge { display: inline-flex; align-items: center; padding: 0.35em 0.8em; font-size: 0.70rem; font-weight: 700; border-radius: 9999px; }
         .badge-active { color: #065f46; background: #d1fae5; border: 1px solid #6ee7b7; }
         .badge-inactive { color: #991b1b; background: #fee2e2; border: 1px solid #fca5a5; }
         .badge-offline { color: #475569; background-color: #f1f5f9; border: 1px solid #cbd5e1; }
         
-        /* Botones */
-        .btn { padding: 0.6rem 1rem; border-radius: 0.75rem; font-weight: 600; transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem; justify-content: center; font-size: 0.875rem; }
-        .btn:active { transform: scale(0.95); }
-        .btn-green { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; }
-        .btn-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; }
-        
-        /* Inputs Editables */
-        .editable-input { background: #f8fafc; border: 1px solid #e2e8f0; width: 100%; padding: 0.75rem; border-radius: 0.75rem; transition: all 0.2s; }
+        .editable-input { background: #f8fafc; border: 1px solid #e2e8f0; width: 100%; padding: 0.75rem; border-radius: 0.75rem; transition: all 0.2s; font-size: 1rem; }
         .editable-input:disabled { background: transparent; border-color: transparent; padding-left: 0; font-weight: 700; color: #1e293b; opacity: 1; }
-
-        /* Toasts (Notificaciones de Conexión) */
-        #toast-container { position: fixed; top: 1rem; left: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
-        .toast { background: white; padding: 1rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 4px solid #4f46e5; transform: translateY(-120%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 0.75rem; align-items: center; }
+        
+        #toast-container { position: fixed; top: 1rem; left: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
+        .toast { pointer-events: auto; background: white; padding: 1rem; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-left: 4px solid #4f46e5; transform: translateY(-150%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 0.75rem; align-items: center; }
         .toast.show { transform: translateY(0); }
-
-        /* Calendario de Ausencias */
+        
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         .day { aspect-ratio: 1; display: flex; items-center; justify-content: center; border-radius: 0.5rem; background-color: #f8fafc; font-size: 0.8rem; font-weight: 600; border: 1px solid transparent; align-items: center; }
         .day.absent { background-color: #fef2f2; color: #dc2626; border-color: #fecaca; font-weight: 800; }
-
-        /* Modal Estilo Celular (Bottom Sheet) */
-        .modal-sheet {
-            position: fixed; inset: 0; z-index: 50; display: none; align-items: flex-end;
-        }
-        .modal-sheet.open { display: flex; }
-        .modal-content {
-            background: white; width: 100%; border-radius: 2rem 2rem 0 0; max-height: 92vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s ease-out;
-        }
-        .modal-sheet.open .modal-content { transform: translateY(0); }
         
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .modal-sheet { position: fixed; inset: 0; z-index: 50; display: none; align-items: flex-end; }
+        .modal-sheet.open { display: flex; }
+        .modal-content { background: white; width: 100%; border-radius: 2rem 2rem 0 0; max-height: 92vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.4s ease-out; }
+        .modal-sheet.open .modal-content { transform: translateY(0); }
+        .btn-active:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="p-4 pb-12">
@@ -75,79 +57,61 @@
     <div class="max-w-4xl mx-auto">
         <!-- HEADER -->
         <header class="mb-6 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-                    <span class="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm">
-                        <i class="fas fa-users-cog"></i>
-                    </span>
-                    Socios
-                </h1>
-            </div>
-            
+            <h1 class="text-2xl font-black text-slate-800 flex items-center gap-2">
+                <span class="bg-indigo-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm"><i class="fas fa-users-cog"></i></span>
+                Socios
+            </h1>
             <div id="status-badge" class="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
-                <span class="relative flex h-2 w-2">
-                  <span id="ping-animate" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-                  <span id="ping-static" class="relative inline-flex rounded-full h-2 w-2 bg-slate-500"></span>
-                </span>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest" id="last-update-text">Conectando</p>
+                <span id="ping-static" class="w-2 h-2 rounded-full bg-slate-500"></span>
+                <p class="text-[10px] font-bold text-slate-500 uppercase" id="last-update-text">Conectando</p>
             </div>
         </header>
 
-        <!-- DASHBOARD (ORDEN ORIGINAL) -->
-        <section class="space-y-4 mb-6">
-            <!-- TARJETAS ESTADÍSTICAS -->
-            <div class="grid grid-cols-3 gap-2">
-                <div id="card-total" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center active:scale-95 transition-transform">
-                    <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Total</p>
-                    <p id="total-users" class="text-xl font-black text-slate-700">0</p>
-                </div>
-                <div id="card-active" class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 text-center active:scale-95 transition-transform">
-                    <p class="text-[9px] font-bold text-emerald-600 uppercase mb-1">En Sala</p>
-                    <p id="active-users" class="text-xl font-black text-emerald-600">0</p>
-                </div>
-                <div id="card-inactive" class="bg-white p-4 rounded-2xl shadow-sm border border-red-100 text-center active:scale-95 transition-transform">
-                    <p class="text-[9px] font-bold text-red-600 uppercase mb-1">Bloqueados</p>
-                    <p id="inactive-users" class="text-xl font-black text-red-600">0</p>
-                </div>
+        <!-- DASHBOARD (ESTADISTICAS) -->
+        <section class="grid grid-cols-3 gap-2 mb-6">
+            <div id="card-total" class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 text-center btn-active cursor-pointer">
+                <p class="text-[9px] font-bold text-slate-400 uppercase mb-1">Total</p>
+                <p id="total-users" class="text-xl font-black text-slate-700">0</p>
             </div>
-
-            <!-- ACTIVIDAD RECIENTE -->
-            <div class="bg-slate-900 rounded-3xl p-5 shadow-lg">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fas fa-bolt text-yellow-400"></i> Actividad Reciente
-                    </h2>
-                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-                </div>
-                <ul id="recent-activity-list" class="space-y-3 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                    <li class="text-center text-slate-500 text-xs py-4 italic">Cargando actividad...</li>
-                </ul>
+            <div id="card-active" class="bg-white p-4 rounded-2xl shadow-sm border border-emerald-100 text-center btn-active cursor-pointer">
+                <p class="text-[9px] font-bold text-emerald-600 uppercase mb-1">En Sala</p>
+                <p id="active-users" class="text-xl font-black text-emerald-600">0</p>
+            </div>
+            <div id="card-inactive" class="bg-white p-4 rounded-2xl shadow-sm border border-red-100 text-center btn-active cursor-pointer">
+                <p class="text-[9px] font-bold text-red-600 uppercase mb-1">Bloqueados</p>
+                <p id="inactive-users" class="text-xl font-black text-red-600">0</p>
             </div>
         </section>
 
-        <!-- DIRECTORIO (ORDEN ORIGINAL) -->
+        <!-- ACTIVIDAD RECIENTE -->
+        <section class="bg-slate-900 rounded-3xl p-5 shadow-lg mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 text-white"><i class="fas fa-bolt text-yellow-400"></i> Actividad Reciente</h2>
+            </div>
+            <ul id="recent-activity-list" class="space-y-3 max-h-48 overflow-y-auto text-white">
+                <li class="text-center text-slate-500 text-xs py-4 italic">Buscando actividad...</li>
+            </ul>
+        </section>
+
+        <!-- DIRECTORIO -->
         <section class="space-y-4">
             <div class="flex flex-col gap-2">
-                <div class="relative">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="searchInput" placeholder="Buscar socio..." class="w-full pl-10 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                </div>
+                <input type="text" id="searchInput" placeholder="Buscar socio..." class="w-full px-4 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none">
                 <select id="filterInput" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 outline-none">
-                    <option value="all">Todos los estados</option>
+                    <option value="all">Ver todos los socios</option>
                     <option value="Activo">Activos / En Sala</option>
                     <option value="Inactivo">Bloqueados</option>
                 </select>
             </div>
-
             <div class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
                 <div id="users-table-body" class="divide-y divide-slate-50">
-                    <div class="p-10 text-center text-slate-400 text-sm animate-pulse">Sincronizando socios...</div>
+                    <div class="p-10 text-center text-slate-400 text-sm animate-pulse">Cargando socios...</div>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- MODAL PRINCIPAL (BOTTOM SHEET) -->
+    <!-- MODAL PRINCIPAL -->
     <div id="userDetailsModal" class="modal-sheet">
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" id="modal-overlay"></div>
         <div class="modal-content relative shadow-2xl">
@@ -156,61 +120,61 @@
             <div class="px-6 pb-4 flex justify-between items-start">
                 <div>
                     <h3 id="modal-header-display" class="text-xl font-black text-slate-800 leading-tight">Nombre Socio</h3>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">ID: <span id="modal-id" class="text-indigo-600 font-mono">--</span></p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase mt-1 tracking-widest">ID SOCIO: <span id="modal-id" class="text-indigo-600 font-mono">--</span></p>
                 </div>
                 <div class="flex gap-2">
-                    <button id="toggleEditBtn" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fas fa-pen text-xs"></i></button>
-                    <button id="closeModalBtn" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center"><i class="fas fa-times text-lg"></i></button>
+                    <button id="toggleEditBtn" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center btn-active"><i class="fas fa-pen text-xs"></i></button>
+                    <button id="closeModalBtn" class="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center btn-active"><i class="fas fa-times text-lg"></i></button>
                 </div>
             </div>
 
-            <div class="px-6 pb-12 overflow-y-auto custom-scrollbar space-y-6" id="modal-form-container">
+            <div class="px-6 pb-12 overflow-y-auto space-y-6" id="modal-form-container">
                 <!-- PUNTOS -->
                 <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-5 text-white shadow-xl">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-80">Puntos Acumulados</span>
+                        <span class="text-[10px] font-bold uppercase opacity-80 tracking-widest">Puntos Disponibles</span>
                         <i class="fas fa-star text-amber-300"></i>
                     </div>
                     <div class="flex items-center justify-between">
                         <span id="modal-puntos-display" class="text-5xl font-black tracking-tighter">0</span>
                         <div class="grid grid-cols-2 gap-2">
-                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn" data-val="-10">-10</button>
-                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn" data-val="10">+10</button>
-                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn" data-val="-1">-1</button>
-                            <button class="w-10 h-10 rounded-xl bg-white text-indigo-600 font-black point-btn" data-val="1">+1</button>
+                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn btn-active" data-val="-10">-10</button>
+                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn btn-active" data-val="10">+10</button>
+                            <button class="w-10 h-10 rounded-xl bg-white/20 font-bold point-btn btn-active" data-val="-1">-1</button>
+                            <button class="w-10 h-10 rounded-xl bg-white text-indigo-600 font-black point-btn btn-active" data-val="1">+1</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
-                    <button id="openSaldoModalBtn" class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-left active:scale-95 transition-transform">
+                    <div id="openSaldoModalBtn" class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-left btn-active cursor-pointer">
                         <p class="text-[9px] font-bold text-emerald-600 uppercase mb-1">Saldo Anterior</p>
                         <p id="modal-saldo-anterior" class="text-lg font-black text-slate-700">$0</p>
-                    </button>
-                    <button id="openAbsenceModalBtn" class="bg-rose-50 p-4 rounded-2xl border border-rose-100 text-left active:scale-95 transition-transform">
+                    </div>
+                    <div id="openAbsenceModalBtn" class="bg-rose-50 p-4 rounded-2xl border border-rose-100 text-left btn-active cursor-pointer">
                         <p class="text-[9px] font-bold text-rose-600 uppercase mb-1">Ausencias</p>
                         <p id="modal-dias-ausencia" class="text-lg font-black text-slate-700">0 días</p>
-                    </button>
+                    </div>
                 </div>
 
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Nombre</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Nombre</label>
                             <input type="text" id="modal-nombre" class="editable-input" disabled>
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Apellido</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Apellido</label>
                             <input type="text" id="modal-apellido" class="editable-input" disabled>
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Teléfono</label>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Teléfono</label>
                         <input type="text" id="modal-telefono" class="editable-input" disabled>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Sección</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Sección</label>
                             <select id="modal-seccion" class="editable-input" disabled>
                                 <option value="General">General</option>
                                 <option value="Mesas">Mesas</option>
@@ -220,69 +184,70 @@
                             </select>
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Contrato</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase">Contrato</label>
                             <input type="text" id="modal-contrato" class="editable-input" disabled>
                         </div>
                     </div>
-                    
-                    <div class="pt-4 border-t border-slate-100">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase ml-1 block mb-2">Fecha Ingreso</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="modal-dia" class="editable-input text-center w-1/4" placeholder="DD" disabled>
-                            <select id="modal-mes" class="editable-input flex-1" disabled>
+                    <div class="pt-2 border-t">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase">Fecha de Ingreso</label>
+                        <div class="flex gap-2 mt-1">
+                            <input type="number" id="modal-dia" class="editable-input text-center" placeholder="DD" disabled>
+                            <select id="modal-mes" class="editable-input" disabled>
                                 <option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option>
                             </select>
-                            <input type="number" id="modal-anio" class="editable-input text-center w-1/3" placeholder="AAAA" disabled>
+                            <input type="number" id="modal-anio" class="editable-input text-center" placeholder="AAAA" disabled>
                         </div>
                     </div>
                 </div>
 
-                <button id="saveChangesBtn" class="hidden w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg"><i class="fas fa-save mr-2"></i> GUARDAR CAMBIOS</button>
+                <button id="saveChangesBtn" class="hidden w-full py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg">GUARDAR CAMBIOS</button>
 
                 <div class="space-y-3">
-                    <h4 class="text-[10px] font-bold text-slate-800 uppercase flex justify-between tracking-widest"><span>Historial de Accesos</span></h4>
+                    <h4 class="text-[10px] font-bold text-slate-800 uppercase flex justify-between items-center">
+                        <span>Historial de Accesos</span>
+                        <span id="modal-total-visitas-badge" class="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded text-[9px] font-black border border-indigo-200">Total: 0</span>
+                    </h4>
                     <ul id="modal-historial-lista" class="bg-slate-50 rounded-2xl divide-y divide-slate-100 border border-slate-100 overflow-hidden text-xs"></ul>
                 </div>
 
-                <button id="deleteUserBtn" class="w-full py-4 text-rose-500 font-bold text-[10px] uppercase tracking-[0.2em]"><i class="fas fa-trash-alt mr-2"></i> Eliminar Socio permanentemente</button>
+                <button id="deleteUserBtn" class="w-full py-4 text-rose-500 font-bold text-[10px] uppercase"><i class="fas fa-trash-alt mr-2"></i> Eliminar Socio Permanentemente</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL SALDO -->
     <div id="saldoModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-6">
-        <div class="bg-white rounded-[2rem] w-full max-w-xs p-6 space-y-4">
-            <h3 class="font-bold text-slate-800 text-center uppercase text-xs tracking-widest">Editar Saldo</h3>
+        <div class="bg-white rounded-[2rem] w-full max-w-xs p-8 space-y-6">
+            <h3 class="font-black text-slate-800 text-center uppercase text-xs tracking-widest">Editar Saldo</h3>
             <div class="relative">
-                <span class="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">$</span>
-                <input type="number" id="saldoInput" class="w-full bg-slate-100 p-4 pl-8 rounded-2xl text-xl font-black outline-none focus:ring-2 focus:ring-indigo-600">
+                <span class="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-400 text-xl">$</span>
+                <input type="number" id="saldoInput" class="w-full bg-slate-100 p-5 pl-10 rounded-2xl text-2xl font-black outline-none focus:ring-4 focus:ring-indigo-600/20">
             </div>
-            <div class="flex gap-2">
-                <button id="cancelSaldoBtn" class="flex-1 py-3 text-slate-500 font-bold">Cancelar</button>
-                <button id="saveSaldoBtn" class="flex-1 py-3 bg-emerald-500 text-white rounded-xl font-bold">Guardar</button>
+            <div class="flex gap-3">
+                <button id="cancelSaldoBtn" class="flex-1 py-4 text-slate-500 font-bold text-sm">Cerrar</button>
+                <button id="saveSaldoBtn" class="flex-1 py-4 bg-emerald-500 text-white rounded-2xl font-black text-sm">Guardar</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL AUSENCIAS -->
     <div id="absenceModal" class="fixed inset-0 z-[60] bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-6 overflow-hidden">
-            <div class="flex justify-between items-center mb-6">
-                <button id="prevMonthBtn" class="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl"><i class="fas fa-chevron-left"></i></button>
+        <div class="bg-white rounded-[2.5rem] w-full max-w-md p-6 overflow-hidden shadow-2xl">
+            <div class="flex justify-between items-center mb-6 px-2">
+                <button id="prevMonthBtn" class="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-2xl"><i class="fas fa-chevron-left"></i></button>
                 <h4 id="monthYear" class="font-black text-slate-800 capitalize"></h4>
-                <button id="nextMonthBtn" class="w-10 h-10 flex items-center justify-center bg-slate-100 rounded-xl"><i class="fas fa-chevron-right"></i></button>
+                <button id="nextMonthBtn" class="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-2xl"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div id="calendar-container" class="mb-6"></div>
-            <div class="flex gap-2">
-                <button id="cancelAbsenceBtn" class="flex-1 py-3 text-slate-500 font-bold text-sm">Cerrar</button>
-                <button id="saveAbsenceBtn" class="flex-1 py-3 bg-rose-500 text-white rounded-xl font-black text-sm uppercase">Guardar Faltas</button>
+            <div class="flex gap-3">
+                <button id="cancelAbsenceBtn" class="flex-1 py-4 text-slate-500 font-bold text-sm">Cerrar</button>
+                <button id="saveAbsenceBtn" class="flex-1 py-4 bg-rose-500 text-white rounded-2xl font-black text-sm uppercase">Guardar Faltas</button>
             </div>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // --- LOGICA ORIGINAL RECUPERADA ---
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
 
         let state = { users: [], latestTimestamp: null, isFetching: false, currentUser: null, isEditing: false, calendarDate: new Date() };
@@ -293,21 +258,22 @@
                 el: document.getElementById('userDetailsModal'), 
                 headerDisplay: document.getElementById('modal-header-display'), 
                 id: document.getElementById('modal-id'),
-                nombre: document.getElementById('modal-nombre'), 
+                nombre: document.getElementById('modal-nombre'),
                 apellido: document.getElementById('modal-apellido'),
                 phone: document.getElementById('modal-telefono'),
-                section: document.getElementById('modal-seccion'), 
-                contract: document.getElementById('modal-contrato'), 
-                dia: document.getElementById('modal-dia'), 
-                mes: document.getElementById('modal-mes'), 
+                section: document.getElementById('modal-seccion'),
+                contract: document.getElementById('modal-contrato'),
+                dia: document.getElementById('modal-dia'),
+                mes: document.getElementById('modal-mes'),
                 anio: document.getElementById('modal-anio'),
                 points: document.getElementById('modal-puntos-display'), 
-                history: document.getElementById('modal-historial-lista'), 
+                history: document.getElementById('modal-historial-lista'),
+                visitasBadge: document.getElementById('modal-total-visitas-badge'),
                 editBtn: document.getElementById('toggleEditBtn'), 
                 saveBtn: document.getElementById('saveChangesBtn'), 
                 closeBtn: document.getElementById('closeModalBtn'),
                 deleteBtn: document.getElementById('deleteUserBtn'),
-                saldo: document.getElementById('modal-saldo-anterior'),
+                saldo: document.getElementById('modal-saldo-anterior'), 
                 ausencias: document.getElementById('modal-dias-ausencia'),
             },
             searchInput: document.getElementById('searchInput'),
@@ -316,40 +282,25 @@
             counters: { total: document.getElementById('total-users'), active: document.getElementById('active-users'), inactive: document.getElementById('inactive-users') },
             activityList: document.getElementById('recent-activity-list'),
             statusText: document.getElementById('last-update-text'),
-            pingAnimate: document.getElementById('ping-animate'),
             pingStatic: document.getElementById('ping-static'),
             saldoModal: { el: document.getElementById('saldoModal'), input: document.getElementById('saldoInput'), saveBtn: document.getElementById('saveSaldoBtn'), cancelBtn: document.getElementById('cancelSaldoBtn'), openBtn: document.getElementById('openSaldoModalBtn') },
-            absenceModal: { el: document.getElementById('absenceModal'), calendarContainer: document.getElementById('calendar-container'), monthYear: document.getElementById('monthYear'), prevBtn: document.getElementById('prevMonthBtn'), nextBtn: document.getElementById('nextMonthBtn'), saveBtn: document.getElementById('saveAbsenceBtn'), cancelBtn: document.getElementById('cancelAbsenceBtn') }
+            absenceModal: { el: document.getElementById('absenceModal'), calendarContainer: document.getElementById('calendar-container'), monthYear: document.getElementById('monthYear'), prevBtn: document.getElementById('prevMonthBtn'), nextBtn: document.getElementById('nextMonthBtn'), saveBtn: document.getElementById('saveAbsenceBtn'), cancelBtn: document.getElementById('cancelAbsenceBtn'), openBtn: document.getElementById('openAbsenceModalBtn') }
         };
 
         const safe = str => str ? String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])) : '';
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
-        const timeAgo = d => { if(!d)return'';const s=Math.floor((new Date()-d)/1000);return s<60?'ahora':s<3600?`${Math.floor(s/60)}m`:`${Math.floor(s/3600)}h`; };
-        
-        function normalizarFecha(fechaInput) {
-            if (!fechaInput) return null;
-            if (typeof fechaInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(fechaInput)) return fechaInput;
-            const d = new Date(fechaInput);
-            if (isNaN(d.getTime())) return fechaInput; 
-            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        }
-
-        const setStatus = (status) => {
-            if(status === 'loading') { ui.statusText.textContent = 'Sincronizando...'; ui.pingStatic.className = 'relative inline-flex rounded-full h-2 w-2 bg-indigo-500'; } 
-            else if(status === 'success') { ui.statusText.textContent = 'En Línea'; ui.statusText.className = 'text-[10px] font-bold text-emerald-600 uppercase tracking-widest'; ui.pingStatic.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-500'; ui.pingAnimate.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'; } 
-            else { ui.statusText.textContent = 'Desconectado'; ui.statusText.className = 'text-[10px] font-bold text-red-600 uppercase tracking-widest'; ui.pingStatic.className = 'relative inline-flex rounded-full h-2 w-2 bg-red-500'; ui.pingAnimate.className = 'hidden'; }
-        };
+        const timeAgo = d => { if(!d)return''; const s=Math.floor((new Date()-d)/1000); return s<60?'ahora':s<3600?`${Math.floor(s/60)}m`:`${Math.floor(s/3600)}h`; };
+        const normalizarFecha = f => { if(!f)return null; const d=new Date(f); return isNaN(d.getTime())?f:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
         const fetchData = async () => {
             if(state.isFetching) return;
             state.isFetching = true;
-            setStatus('loading');
             try {
                 const response = await fetch(SCRIPT_URL + '?action=read&v=' + Date.now());
                 const data = await response.json();
                 state.users = data.filter(u => u["ID de Usuario"]).sort((a,b) => parseDate(b.Timestamp) - parseDate(a.Timestamp));
                 
-                // --- LOGICA DE ESCUCHA DE SOCIOS (CRITICAL) ---
+                // DETECCIÓN TIEMPO REAL
                 if (state.users.length > 0) {
                     const newest = state.users[0];
                     if (state.latestTimestamp && newest.Timestamp !== state.latestTimestamp && parseDate(newest.Timestamp) > parseDate(state.latestTimestamp)) {
@@ -358,9 +309,7 @@
                     state.latestTimestamp = newest.Timestamp;
                 }
 
-                renderTable();
-                updateCounters();
-                renderActivity();
+                renderTable(); updateCounters(); renderActivity();
                 
                 if(state.currentUser) {
                     const fresh = state.users.find(u => u['ID de Usuario'] == state.currentUser['ID de Usuario']);
@@ -368,15 +317,12 @@
                         state.currentUser = fresh;
                         if(!state.isEditing) {
                             ui.modal.points.textContent = fresh.Puntos || 0;
-                            ui.modal.headerDisplay.textContent = `${fresh.Nombre} ${fresh.Apellido}`; 
+                            ui.modal.visitasBadge.textContent = `Total: ${Array.isArray(fresh.Historial) ? fresh.Historial.length : 0}`;
                         }
-                        ui.modal.saldo.textContent = `$${(fresh.SaldoAnterior || 0).toLocaleString('es-CL')}`;
-                        ui.modal.ausencias.textContent = `${Array.isArray(fresh.DiasAusencia) ? fresh.DiasAusencia.length : 0} días`;
                     }
                 }
-                setStatus('success');
-            } catch(e) { setStatus('error'); } 
-            finally { state.isFetching = false; }
+                ui.statusText.textContent = 'En Línea'; ui.pingStatic.className = 'w-2 h-2 rounded-full bg-emerald-500';
+            } catch(e) { ui.statusText.textContent = 'Error'; } finally { state.isFetching = false; }
         };
 
         const renderActivity = () => {
@@ -384,197 +330,141 @@
             state.users.slice(0, 10).forEach(u => {
                 const lastSeen = parseDate(u.Timestamp);
                 const isOnline = u.Estado === 'Activo' && (new Date() - lastSeen) / 1000 / 60 < 12;
-                ui.activityList.innerHTML += `
-                    <li class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-700">
-                            ${u.Nombre[0]}${u.Apellido[0]}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-xs font-bold text-slate-200 truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
-                            <p class="text-[9px] font-bold ${isOnline ? 'text-emerald-400' : 'text-slate-500'} uppercase">
-                                ${isOnline ? 'En sala ahora' : 'Hace ' + timeAgo(lastSeen)}
-                            </p>
-                        </div>
-                        ${u.Estado === 'Activo' ? `<button class="btn-kick text-rose-500 p-2" data-id="${u['ID de Usuario']}"><i class="fas fa-power-off text-xs"></i></button>` : ''}
-                    </li>
-                `;
+                ui.activityList.innerHTML += `<li class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-slate-800 flex items-center justify-center text-[10px] font-black">${u.Nombre[0]}${u.Apellido[0]}</div>
+                    <div class="flex-1 truncate"><p class="text-xs font-bold truncate text-slate-100">${u.Nombre} ${u.Apellido}</p><p class="text-[9px] ${isOnline?'text-emerald-400':'text-slate-500'} uppercase">${isOnline?'En sala':'Hace '+timeAgo(lastSeen)}</p></div>
+                    ${u.Estado==='Activo' ? `<button class="btn-kick text-rose-500 p-2" data-id="${u['ID de Usuario']}"><i class="fas fa-power-off text-xs"></i></button>` : ''}</li>`;
             });
-            document.querySelectorAll('.btn-kick').forEach(btn => btn.onclick = (e) => { e.stopPropagation(); kickUser(btn); });
+            document.querySelectorAll('.btn-kick').forEach(btn => btn.onclick = e => { e.stopPropagation(); kickUser(btn); });
         };
 
-        const kickUser = async (btn) => {
-            const id = btn.dataset.id;
-            if(!confirm("¿Cerrar sesión de este socio?")) return;
+        const kickUser = async btn => {
+            if(!confirm("¿Cerrar sesión?")) return;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status: 'KICK' }) });
-                fetchData(); 
-            } catch(e) { alert('Error'); }
-        };
-
-        const renderTable = () => {
-            const searchTerm = ui.searchInput.value.toLowerCase();
-            const filterStatus = ui.filterInput.value;
-            const list = state.users.filter(u => {
-                const matchesSearch = ((u.Nombre || '') + (u.Apellido || '')).toLowerCase().includes(searchTerm);
-                const isConsideredActive = u.Estado !== 'Inactivo';
-                const matchesStatus = filterStatus === 'all' || (filterStatus === 'Activo' && isConsideredActive) || (filterStatus === 'Inactivo' && !isConsideredActive);
-                return matchesSearch && matchesStatus;
-            });
-            
-            ui.tableBody.innerHTML = list.length ? '' : '<div class="p-10 text-center text-slate-400 text-sm italic">Sin resultados</div>';
-            list.forEach(u => {
-                const isBlocked = u.Estado === 'Inactivo';
-                const badgeClass = isBlocked ? 'badge-inactive' : (u.Estado === 'Activo' ? 'badge-active' : 'badge-offline');
-                const badgeText = isBlocked ? 'Bloqueado' : (u.Estado === 'Activo' ? 'Activo' : 'Offline');
-                
-                ui.tableBody.innerHTML += `
-                    <div class="p-4 flex items-center gap-4 cursor-pointer active:bg-slate-50" data-id="${u['ID de Usuario']}">
-                        <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-400 border border-slate-50">
-                            ${u.Nombre[0]}${u.Apellido[0]}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h4 class="font-bold text-slate-800 text-sm truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</h4>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="badge ${badgeClass}">${badgeText}</span>
-                                <span class="text-[10px] font-black text-amber-500"><i class="fas fa-star mr-1"></i>${u.Puntos||0}</span>
-                            </div>
-                        </div>
-                        <button class="btn-status w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center" data-id="${u['ID de Usuario']}" data-status="${isBlocked ? 'Activo' : 'Inactivo'}">
-                            <i class="fas ${isBlocked ? 'fa-unlock text-emerald-500' : 'fa-ban text-rose-400'}"></i>
-                        </button>
-                    </div>
-                `;
-            });
-        };
-
-        const updateCounters = () => { 
-            const active = state.users.filter(u=>u.Estado!=='Inactivo').length; 
-            ui.counters.total.textContent = state.users.length; 
-            ui.counters.active.textContent = active; 
-            ui.counters.inactive.textContent = state.users.length - active; 
-        };
-
-        const showToast = (msg) => {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.innerHTML = `<i class="fas fa-id-card text-indigo-600 text-xl"></i><div><p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nuevo Acceso</p><p class="text-xs font-bold text-slate-800">${msg.Nombre} ${msg.Apellido} ha ingresado.</p></div>`;
-            document.getElementById('toast-container').appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 100);
-            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
-        };
-
-        const openModal = (user) => {
-            state.currentUser = user;
-            state.isEditing = false;
-            updateEditModeUI();
-            const m = ui.modal;
-            m.headerDisplay.textContent = `${user.Nombre} ${user.Apellido}`;
-            m.nombre.value = user.Nombre || '';
-            m.apellido.value = user.Apellido || '';
-            m.id.textContent = user['ID de Usuario'];
-            m.phone.value = user.Teléfono || '';
-            m.section.value = user.Sección || 'General';
-            m.contract.value = user['Tipo de Contrato'] || '';
-            m.points.textContent = user.Puntos || 0;
-            m.dia.value = user['Día de Ingreso'] || '';
-            m.mes.value = user['Mes de Ingreso'] || 'Enero';
-            m.anio.value = user['Año de Ingreso'] || '';
-            m.saldo.textContent = `$${(user.SaldoAnterior || 0).toLocaleString('es-CL')}`;
-            m.ausencias.textContent = `${Array.isArray(user.DiasAusencia) ? user.DiasAusencia.length : 0} días`;
-            
-            m.history.innerHTML = '';
-            (user.Historial || []).slice(0, 10).forEach(h => {
-                const d = new Date(h);
-                m.history.innerHTML += `<li class="p-3 flex justify-between items-center"><span class="font-bold text-slate-600">${d.toLocaleDateString('es-CL')}</span><span class="text-slate-400">${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} HRS</span></li>`;
-            });
-
-            ui.modal.el.classList.add('open');
-        };
-
-        const closeModal = () => { ui.modal.el.classList.remove('open'); state.currentUser = null; };
-        
-        const updateEditModeUI = () => {
-            const m = ui.modal;
-            const fields = [m.nombre, m.apellido, m.phone, m.section, m.contract, m.dia, m.mes, m.anio];
-            if(state.isEditing) {
-                fields.forEach(el => el.disabled = false);
-                m.saveBtn.classList.remove('hidden');
-                m.editBtn.className = 'w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center';
-            } else {
-                fields.forEach(el => el.disabled = true);
-                m.saveBtn.classList.add('hidden');
-                m.editBtn.className = 'w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center';
-            }
-        };
-
-        // --- EVENTOS ---
-        ui.tableBody.onclick = e => {
-            const row = e.target.closest('.p-4');
-            const btn = e.target.closest('.btn-status');
-            if(btn) { e.stopPropagation(); toggleStatus(btn); }
-            else if(row) { const u = state.users.find(x => x['ID de Usuario'] == row.dataset.id); if(u) openModal(u); }
-        };
-
-        const toggleStatus = async (btn) => {
-            const id = btn.dataset.id, status = btn.dataset.status;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id, status }) });
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: btn.dataset.id, status: 'KICK' }) });
             fetchData();
         };
 
-        const updatePoints = async (amount) => {
-            if (!state.currentUser) return;
-            const cur = parseInt(ui.modal.points.textContent);
-            ui.modal.points.textContent = cur + amount;
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: state.currentUser['ID de Usuario'], amount }) });
+        const renderTable = () => {
+            const search = ui.searchInput.value.toLowerCase();
+            const filter = ui.filterInput.value;
+            const list = state.users.filter(u => {
+                const matchSearch = (safe(u.Nombre) + safe(u.Apellido)).toLowerCase().includes(search);
+                const matchStatus = filter === 'all' || (filter === 'Activo' && u.Estado !== 'Inactivo') || (filter === 'Inactivo' && u.Estado === 'Inactivo');
+                return matchSearch && matchStatus;
+            });
+            ui.tableBody.innerHTML = list.length ? '' : '<div class="p-10 text-center text-slate-400 text-sm">Sin resultados</div>';
+            list.forEach(u => {
+                const isBlocked = u.Estado === 'Inactivo';
+                ui.tableBody.innerHTML += `<div class="p-4 flex items-center gap-4 cursor-pointer active:bg-slate-50" data-id="${u['ID de Usuario']}">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center font-black text-slate-400">${u.Nombre[0]}${u.Apellido[0]}</div>
+                    <div class="flex-1 min-w-0"><h4 class="font-bold text-slate-800 text-sm truncate">${safe(u.Nombre)} ${safe(u.Apellido)}</h4>
+                    <div class="flex items-center gap-2 mt-1"><span class="badge ${isBlocked?'badge-inactive':(u.Estado==='Activo'?'badge-active':'badge-offline')}">${isBlocked?'Bloqueado':(u.Estado==='Activo'?'Activo':'Offline')}</span>
+                    <span class="text-[9px] font-black text-indigo-500 bg-indigo-50 px-1 py-0.5 rounded">Visitas: ${u.Historial?u.Historial.length:0}</span></div></div>
+                    <button class="btn-status w-10 h-10 rounded-xl bg-slate-50" data-id="${u['ID de Usuario']}" data-status="${isBlocked?'Activo':'Inactivo'}"><i class="fas ${isBlocked?'fa-unlock text-emerald-500':'fa-ban text-rose-400'}"></i></button></div>`;
+            });
         };
 
-        document.querySelectorAll('.point-btn').forEach(b => b.onclick = () => updatePoints(parseInt(b.dataset.val)));
-        ui.modal.closeBtn.onclick = closeModal;
-        document.getElementById('modal-overlay').onclick = closeModal;
+        const showToast = msg => {
+            const t = document.createElement('div'); t.className = 'toast';
+            t.innerHTML = `<i class="fas fa-id-card text-indigo-600 text-xl"></i><div><p class="text-[9px] font-black text-slate-400 uppercase">Nuevo Acceso</p><p class="text-xs font-bold text-slate-800">${msg.Nombre} ha ingresado.</p></div>`;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => t.classList.add('show'), 100); setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 500); }, 4000);
+        };
+
+        const updateCounters = () => {
+            ui.counters.total.textContent = state.users.length;
+            ui.counters.active.textContent = state.users.filter(u => u.Estado !== 'Inactivo').length;
+            ui.counters.inactive.textContent = state.users.filter(u => u.Estado === 'Inactivo').length;
+        };
+
+        const openModal = user => {
+            state.currentUser = user; state.isEditing = false;
+            const m = ui.modal;
+            m.headerDisplay.textContent = `${user.Nombre} ${user.Apellido}`;
+            m.id.textContent = user['ID de Usuario'];
+            m.nombre.value = user.Nombre || '';
+            m.apellido.value = user.Apellido || '';
+            m.phone.value = user.Teléfono || '';
+            m.section.value = user.Sección || 'General';
+            m.contract.value = user['Tipo de Contrato'] || '';
+            m.dia.value = user['Día de Ingreso'] || '';
+            m.mes.value = user['Mes de Ingreso'] || 'Enero';
+            m.anio.value = user['Año de Ingreso'] || '';
+            m.points.textContent = user.Puntos || 0;
+            m.saldo.textContent = `$${(user.SaldoAnterior || 0).toLocaleString('es-CL')}`;
+            m.ausencias.textContent = `${user.DiasAusencia?user.DiasAusencia.length:0} días`;
+            m.visitasBadge.textContent = `Total: ${user.Historial?user.Historial.length:0}`;
+            
+            m.history.innerHTML = '';
+            (user.Historial || []).slice(0, 15).forEach(h => {
+                const d = new Date(h); m.history.innerHTML += `<li class="p-3 flex justify-between"><span>${d.toLocaleDateString('es-CL')}</span><span>${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} HRS</span></li>`;
+            });
+            updateEditModeUI();
+            m.el.classList.add('open');
+        };
+
+        const updateEditModeUI = () => {
+            const fields = [ui.modal.nombre, ui.modal.apellido, ui.modal.phone, ui.modal.section, ui.modal.contract, ui.modal.dia, ui.modal.mes, ui.modal.anio];
+            fields.forEach(f => f.disabled = !state.isEditing);
+            ui.modal.saveBtn.classList.toggle('hidden', !state.isEditing);
+            ui.modal.editBtn.className = state.isEditing ? 'w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center' : 'w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center';
+        };
+
+        const toggleStatus = async btn => {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: btn.dataset.id, status: btn.dataset.status }) });
+            fetchData();
+        };
+
+        ui.tableBody.onclick = e => {
+            const row = e.target.closest('.active\\:bg-slate-50');
+            const btn = e.target.closest('.btn-status');
+            if(btn) { e.stopPropagation(); toggleStatus(btn); } else if(row) openModal(state.users.find(u => u['ID de Usuario'] == row.dataset.id));
+        };
+
         ui.modal.editBtn.onclick = () => { state.isEditing = !state.isEditing; updateEditModeUI(); };
+        ui.modal.closeBtn.onclick = () => ui.modal.el.classList.remove('open');
+        document.getElementById('modal-overlay').onclick = () => ui.modal.el.classList.remove('open');
         
+        document.querySelectorAll('.point-btn').forEach(b => b.onclick = async () => {
+            const val = parseInt(b.dataset.val);
+            ui.modal.points.textContent = parseInt(ui.modal.points.textContent) + val;
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: state.currentUser['ID de Usuario'], amount: val }) });
+        });
+
         ui.modal.saveBtn.onclick = async () => {
-            const m = ui.modal; m.saveBtn.innerHTML = 'Guardando...';
+            const m = ui.modal; m.saveBtn.textContent = '...';
             const payload = { 
                 action: 'editUser', id: state.currentUser['ID de Usuario'], 
                 nombre: m.nombre.value, apellido: m.apellido.value, telefono: m.phone.value, 
                 seccion: m.section.value, contrato: m.contract.value, dia: m.dia.value, mes: m.mes.value, anio: m.anio.value 
             };
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            state.isEditing = false; updateEditModeUI(); fetchData();
-            m.saveBtn.innerHTML = 'GUARDAR CAMBIOS';
+            state.isEditing = false; updateEditModeUI(); fetchData(); m.saveBtn.textContent = 'GUARDAR CAMBIOS';
         };
 
         ui.modal.deleteBtn.onclick = async () => {
-            if(!confirm("¿Eliminar socio permanentemente?")) return;
+            if(!confirm("¿Eliminar socio?")) return;
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: state.currentUser['ID de Usuario'] }) });
-            closeModal(); fetchData();
+            ui.modal.el.classList.remove('open'); fetchData();
         };
 
         ui.saldoModal.openBtn.onclick = () => { ui.saldoModal.input.value = state.currentUser.SaldoAnterior || 0; ui.saldoModal.el.classList.remove('hidden'); };
         ui.saldoModal.cancelBtn.onclick = () => ui.saldoModal.el.classList.add('hidden');
         ui.saldoModal.saveBtn.onclick = async () => {
-            const amount = parseFloat(ui.saldoModal.input.value);
-            ui.saldoModal.saveBtn.textContent = '...';
+            const amount = parseFloat(ui.saldoModal.input.value); ui.saldoModal.saveBtn.textContent = '...';
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount }) });
-            ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`;
-            ui.saldoModal.el.classList.add('hidden');
-            ui.saldoModal.saveBtn.textContent = 'Guardar';
+            ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`; ui.saldoModal.el.classList.add('hidden'); ui.saldoModal.saveBtn.textContent = 'Guardar';
         };
 
-        document.getElementById('openAbsenceModalBtn').onclick = () => { state.calendarDate = new Date(); renderAbsenceCalendar(); ui.absenceModal.el.classList.remove('hidden'); };
-        document.getElementById('cancelAbsenceBtn').onclick = () => ui.absenceModal.el.classList.add('hidden');
-        document.getElementById('prevMonthBtn').onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() - 1); renderAbsenceCalendar(); };
-        document.getElementById('nextMonthBtn').onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() + 1); renderAbsenceCalendar(); };
-        document.getElementById('saveAbsenceBtn').onclick = async () => {
+        ui.absenceModal.openBtn.onclick = () => { state.calendarDate = new Date(); renderAbsenceCalendar(); ui.absenceModal.el.classList.remove('hidden'); };
+        ui.absenceModal.cancelBtn.onclick = () => ui.absenceModal.el.classList.add('hidden');
+        ui.absenceModal.saveBtn.onclick = async () => {
             const dates = Array.from(ui.absenceModal.calendarContainer.querySelectorAll('.day.absent')).map(d => d.dataset.date);
-            document.getElementById('saveAbsenceBtn').textContent = '...';
+            ui.absenceModal.saveBtn.textContent = '...';
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateAbsences', id: state.currentUser['ID de Usuario'], dates }) });
-            ui.modal.ausencias.textContent = `${dates.length} días`;
-            ui.absenceModal.el.classList.add('hidden');
-            document.getElementById('saveAbsenceBtn').textContent = 'Guardar Faltas';
+            ui.modal.ausencias.textContent = `${dates.length} días`; ui.absenceModal.el.classList.add('hidden'); ui.absenceModal.saveBtn.textContent = 'Guardar';
         };
 
         function renderAbsenceCalendar() {
@@ -599,8 +489,7 @@
         ui.cards.active.onclick = () => { ui.filterInput.value = 'Activo'; renderTable(); };
         ui.cards.inactive.onclick = () => { ui.filterInput.value = 'Inactivo'; renderTable(); };
 
-        fetchData();
-        setInterval(fetchData, 10000); // REFRESH CADA 10 SEGUNDOS
+        fetchData(); setInterval(fetchData, 10000);
     });
     </script>
 </body>
