@@ -439,6 +439,13 @@
                 }
 
                 renderAll();
+
+                // SI EL MODAL ESTÁ ABIERTO, ACTUALIZAR DATOS EN VIVO
+                if (ui.modal.el.classList.contains('open') && state.currentUser) {
+                    const updatedUser = state.users.find(u => u['ID de Usuario'] === state.currentUser['ID de Usuario']);
+                    if (updatedUser) refreshModalHistory(updatedUser);
+                }
+
                 ui.statusText.textContent = 'MONITOREANDO'; ui.statusText.className = 'text-[9px] font-bold text-emerald-400 uppercase'; ui.pingStatic.className = 'w-2 h-2 rounded-full bg-emerald-500';
             } catch(e) { ui.statusText.textContent = 'ERROR'; ui.pingStatic.className = 'w-2 h-2 rounded-full bg-rose-500'; } 
             finally { state.isFetching = false; }
@@ -481,7 +488,6 @@
             });
             ui.tableBody.innerHTML = list.map(u => {
                 const blocked = u.Estado === 'Inactivo';
-                // SE ELIMINÓ EL ONCLICK DEL TR PARA EVITAR INTERFERENCIAS CON EL BOTÓN
                 return `<tr class="hover:bg-slate-800/50 cursor-pointer" data-id="${u['ID de Usuario']}">
                     <td class="px-4 py-3"><div class="font-bold text-slate-300 text-xs">${safe(u.Nombre)} ${safe(u.Apellido)}</div></td>
                     <td class="px-4 py-3 text-center"><span class="badge ${blocked?'badge-inactive':(u.Estado==='Activo'?'badge-active':'badge-offline')}">${blocked?'BLOQ':(u.Estado==='Activo'?'ACTIVO':'OFF')}</span></td>
@@ -520,21 +526,31 @@
             fetchData();
         };
 
-        // Event listener para tabla: DIFERENCIAR CLIC EN FILA VS CLIC EN BOTÓN
+        // Event listener para tabla
         ui.tableBody.onclick = e => {
             const btn = e.target.closest('.btn-status');
             const row = e.target.closest('tr');
+            if(btn) { e.stopPropagation(); toggleStatus(btn); } 
+            else if(row) { const id = row.getAttribute('data-id'); openModalById(id); }
+        };
+
+        // FUNCIÓN MEJORADA: Refrescar historial dentro del modal
+        const refreshModalHistory = (u) => {
+            if (!u.Historial || !Array.isArray(u.Historial)) return;
             
-            if(btn) { 
-                // Si el clic es en el botón de bloqueo
-                e.stopPropagation(); 
-                toggleStatus(btn); 
-            } 
-            else if(row) {
-                // Si el clic es en el resto de la fila
-                const id = row.getAttribute('data-id');
-                openModalById(id);
-            }
+            // ORDENAR HISTORIAL: Forzar que el más reciente esté arriba
+            const sortedHistory = [...u.Historial]
+                .map(h => new Date(h))
+                .filter(d => !isNaN(d.getTime())) // Filtrar fechas inválidas
+                .sort((a, b) => b - a); // Orden descendente (más nuevo a más viejo)
+
+            ui.modal.badge.textContent = `Total: ${sortedHistory.length}`;
+            ui.modal.history.innerHTML = sortedHistory.slice(0, 50).map(d => `
+                <li class="flex justify-between py-2 px-2 hover:bg-slate-700/30">
+                    <span class="font-medium">${d.toLocaleDateString('es-CL')}</span>
+                    <span class="text-indigo-400 font-mono">${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} HRS</span>
+                </li>
+            `).join('');
         };
 
         // Modal Logic
@@ -549,22 +565,22 @@
             m.section.value = u.Sección || 'General'; m.contract.value = u['Tipo de Contrato'] || '';
             m.dia.value = u['Día de Ingreso'] || ''; m.mes.value = u['Mes de Ingreso'] || 'Enero'; m.anio.value = u['Año de Ingreso'] || '';
             m.puntos.textContent = u.Puntos || 0; m.saldo.textContent = `$${(u.SaldoAnterior||0).toLocaleString('es-CL')}`; 
-            m.ausencias.textContent = `${u.DiasAusencia?.length||0} días`; m.badge.textContent = `Total: ${u.Historial?.length||0}`;
+            m.ausencias.textContent = `${u.DiasAusencia?.length||0} días`;
             
-            // Configurar botón de estado en modal
+            refreshModalHistory(u); // Cargar historial ordenado
+            
             const isBlocked = u.Estado === 'Inactivo';
             m.statusBtn.className = isBlocked 
                 ? 'px-4 py-2 rounded-lg font-bold text-xs uppercase transition-colors bg-rose-500/20 text-rose-400 border border-rose-500/50 hover:bg-rose-500/30' 
                 : 'px-4 py-2 rounded-lg font-bold text-xs uppercase transition-colors bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30';
             m.statusBtn.innerHTML = isBlocked ? '<i class="fas fa-ban mr-2"></i> Bloqueado' : '<i class="fas fa-check-circle mr-2"></i> Habilitado';
+            
             m.statusBtn.onclick = async () => {
                 m.statusBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: u['ID de Usuario'], status: isBlocked ? 'Activo' : 'Inactivo' }) });
-                fetchData(); setTimeout(() => openModalById(u['ID de Usuario']), 500); // Recargar modal
+                fetchData(); setTimeout(() => openModalById(u['ID de Usuario']), 500);
             };
 
-            m.history.innerHTML = (u.Historial||[]).slice().reverse().slice(0,50).map(h=>{ const d=new Date(h); return `<li class="flex justify-between py-2 px-2 hover:bg-slate-700/30"><span>${d.toLocaleDateString('es-CL')}</span><span>${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} HRS</span></li>`}).join('');
-            
             updateEditModeUI();
             m.el.classList.add('open');
         };
