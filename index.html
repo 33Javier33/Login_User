@@ -89,10 +89,9 @@
         .badge-inactive { color: #fca5a5; background: rgba(185, 28, 28, 0.2); border: 1px solid rgba(185, 28, 28, 0.4); }
         .badge-offline { color: #64748b; background: rgba(30, 41, 59, 0.5); border: 1px solid #475569; }
         
-        /* ESTILOS DE INPUT RESTAURADOS PARA QUE SEAN VISIBLES PERO EN MODO OSCURO */
         .editable-input { background: #0f172a; border: 1px solid #334155; color: white; width: 100%; padding: 0.75rem; border-radius: 0.5rem; transition: all 0.2s; }
         .editable-input:disabled { background: transparent; border-color: transparent; padding-left: 0; font-weight: 700; color: #94a3b8; opacity: 1; cursor: not-allowed; }
-        .editable-input:disabled option { display: none; } /* Ocultar opciones al estar deshabilitado */
+        .editable-input:disabled option { display: none; }
 
         #toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; pointer-events: none; }
         .toast { pointer-events: auto; background: #1e293b; color: white; padding: 1rem; border-radius: 0.5rem; border-left: 3px solid #10b981; transform: translateX(100%); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; gap: 0.75rem; align-items: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); }
@@ -103,7 +102,6 @@
         .modal-content { background: #1e293b; width: 100%; max-width: 600px; border-radius: 1rem; max-height: 90vh; overflow-y: auto; border: 1px solid #334155; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); transform: scale(0.95); opacity: 0; transition: all 0.3s ease-out; }
         .modal-sheet.open .modal-content { transform: scale(1); opacity: 1; }
 
-        /* Estilo para el calendario */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
         .day { aspect-ratio: 1; display: flex; items-center; justify-content: center; border-radius: 4px; background-color: #334155; color: #cbd5e1; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
         .day.absent { background-color: rgba(225, 29, 72, 0.2); color: #f43f5e; border: 1px solid #f43f5e; font-weight: 800; }
@@ -128,7 +126,7 @@
                 </div>
                 <div>
                     <h1 class="text-xl font-black text-white tracking-tight">SOCIO<span class="text-indigo-400">FLOW</span></h1>
-                    <p class="text-[10px] text-slate-500 font-mono tracking-widest">FULL ACCESS v2.2</p>
+                    <p class="text-[10px] text-slate-500 font-mono tracking-widest">CarlosPN Interactive® 2026</p>
                 </div>
             </div>
             <div id="status-badge" class="flex items-center gap-2 bg-slate-900/50 px-3 py-1.5 rounded-full border border-slate-700">
@@ -194,8 +192,8 @@
                             <thead class="bg-slate-900/80 text-[10px] uppercase text-slate-500 font-bold sticky top-0 z-10 backdrop-blur-sm">
                                 <tr>
                                     <th class="px-4 py-3">Socio</th>
-                                    <th class="px-4 py-3 text-center">Historial</th>
-                                    <th class="px-4 py-3 text-right">Estado</th>
+                                    <th class="px-4 py-3 text-center">Estado</th>
+                                    <th class="px-4 py-3 text-right">Bloquear</th>
                                 </tr>
                             </thead>
                             <tbody id="users-table-body" class="divide-y divide-slate-800"></tbody>
@@ -215,7 +213,7 @@
         <a href="#seccion-inicio" class="nav-item"><i class="fas fa-arrow-up"></i></a>
     </nav>
 
-    <!-- MODAL PRINCIPAL (CON TODAS LAS OPCIONES RESTAURADAS) -->
+    <!-- MODAL PRINCIPAL -->
     <div id="userDetailsModal" class="modal-sheet">
         <div class="absolute inset-0 bg-black/80" id="modal-overlay"></div>
         <div class="modal-content relative">
@@ -232,7 +230,15 @@
 
             <div class="p-6 space-y-6" id="modal-form-container">
                 
-                <!-- SECCION PUNTOS (COMPLETA CON 4 BOTONES) -->
+                <!-- NUEVO: SELECTOR DE ESTADO -->
+                <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-700 flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estado de Cuenta</span>
+                    <button id="modal-status-toggle" class="px-4 py-2 rounded-lg font-bold text-xs uppercase transition-colors bg-emerald-500/20 text-emerald-400 border border-emerald-500/50">
+                        <i class="fas fa-check-circle mr-2"></i> Habilitado
+                    </button>
+                </div>
+
+                <!-- SECCION PUNTOS -->
                 <div class="bg-gradient-to-br from-indigo-900 to-violet-900 rounded-2xl p-5 text-white shadow-xl border border-indigo-500/30">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-[10px] font-bold uppercase opacity-80 tracking-widest">Puntos Disponibles</span>
@@ -261,7 +267,7 @@
                     </div>
                 </div>
 
-                <!-- FORMULARIO DE DATOS (COMPLETO) -->
+                <!-- FORMULARIO DE DATOS -->
                 <div class="space-y-4 pt-2">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -294,7 +300,7 @@
                         </div>
                     </div>
                     
-                    <!-- FECHA DE INGRESO (RESTAURADA Y VISIBLE) -->
+                    <!-- FECHA DE INGRESO -->
                     <div class="pt-4 border-t border-slate-700/50">
                         <label class="text-[10px] font-bold text-slate-500 uppercase mb-2 block">Fecha de Ingreso</label>
                         <div class="flex gap-2">
@@ -322,7 +328,7 @@
         </div>
     </div>
 
-    <!-- MODAL SALDO (Funcional) -->
+    <!-- MODALES AUXILIARES -->
     <div id="saldoModal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6">
         <div class="bg-slate-800 rounded-2xl w-full max-w-xs p-8 space-y-6 border border-slate-700 shadow-2xl">
             <h3 class="font-black text-white text-center uppercase text-xs tracking-widest">Editar Saldo</h3>
@@ -337,7 +343,6 @@
         </div>
     </div>
 
-    <!-- MODAL AUSENCIAS (Funcional) -->
     <div id="absenceModal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-[2rem] w-full max-w-md p-6 border border-slate-700 shadow-2xl">
             <div class="flex justify-between items-center mb-6 px-2">
@@ -373,10 +378,11 @@
             statusText: document.getElementById('last-update-text'),
             pingStatic: document.getElementById('ping-static'),
             
-            // Modal Elements (COMPLETO)
+            // Modal Elements
             modal: { 
                 el: document.getElementById('userDetailsModal'), 
                 id: document.getElementById('modal-id'), 
+                statusBtn: document.getElementById('modal-status-toggle'),
                 nombre: document.getElementById('modal-nombre'), 
                 apellido: document.getElementById('modal-apellido'), 
                 phone: document.getElementById('modal-telefono'), 
@@ -405,7 +411,7 @@
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
         const normalizarFecha = f => { if(!f)return null; const d=new Date(f); return isNaN(d.getTime())?f:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
-        // Scroll Spy (Menú flotante)
+        // Scroll Spy
         const sections = document.querySelectorAll('section');
         const navItems = document.querySelectorAll('.nav-item');
         window.addEventListener('scroll', () => {
@@ -475,10 +481,15 @@
             });
             ui.tableBody.innerHTML = list.map(u => {
                 const blocked = u.Estado === 'Inactivo';
-                return `<tr class="hover:bg-slate-800/50 cursor-pointer" onclick="openModalById('${u['ID de Usuario']}')">
+                // SE ELIMINÓ EL ONCLICK DEL TR PARA EVITAR INTERFERENCIAS CON EL BOTÓN
+                return `<tr class="hover:bg-slate-800/50 cursor-pointer" data-id="${u['ID de Usuario']}">
                     <td class="px-4 py-3"><div class="font-bold text-slate-300 text-xs">${safe(u.Nombre)} ${safe(u.Apellido)}</div></td>
-                    <td class="px-4 py-3 text-center text-xs font-mono">${u.Historial?.length||0}</td>
-                    <td class="px-4 py-3 text-right"><span class="badge ${blocked?'badge-inactive':'badge-offline'} text-[9px]">${blocked?'BLOQ':'OFF'}</span></td>
+                    <td class="px-4 py-3 text-center"><span class="badge ${blocked?'badge-inactive':(u.Estado==='Activo'?'badge-active':'badge-offline')}">${blocked?'BLOQ':(u.Estado==='Activo'?'ACTIVO':'OFF')}</span></td>
+                    <td class="px-4 py-3 text-right">
+                        <button class="btn-status w-8 h-8 rounded-lg ${blocked?'bg-rose-500/20 text-rose-400 border border-rose-500/50':'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50'} flex items-center justify-center transition-all hover:scale-110" data-id="${u['ID de Usuario']}" data-status="${blocked?'Activo':'Inactivo'}" title="${blocked?'Desbloquear':'Bloquear Acceso'}">
+                            <i class="fas ${blocked?'fa-lock':'fa-lock-open'} text-xs"></i>
+                        </button>
+                    </td>
                 </tr>`
             }).join('');
         };
@@ -496,6 +507,12 @@
             setTimeout(()=>t.classList.add('show'),100); setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),500)},5000);
         };
 
+        const toggleStatus = async btn => {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: btn.dataset.id, status: btn.dataset.status }) });
+            fetchData();
+        };
+
         const kickUser = async btn => {
             if(!confirm("¿CONFIRMAR DESCONEXIÓN FORZADA?")) return;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
@@ -503,48 +520,58 @@
             fetchData();
         };
 
-        // --- LÓGICA DEL MODAL PRINCIPAL ---
+        // Event listener para tabla: DIFERENCIAR CLIC EN FILA VS CLIC EN BOTÓN
+        ui.tableBody.onclick = e => {
+            const btn = e.target.closest('.btn-status');
+            const row = e.target.closest('tr');
+            
+            if(btn) { 
+                // Si el clic es en el botón de bloqueo
+                e.stopPropagation(); 
+                toggleStatus(btn); 
+            } 
+            else if(row) {
+                // Si el clic es en el resto de la fila
+                const id = row.getAttribute('data-id');
+                openModalById(id);
+            }
+        };
+
+        // Modal Logic
         window.openModalById = id => {
             const u = state.users.find(x => x['ID de Usuario'] == id);
             if(!u) return;
             state.currentUser = u; state.isEditing = false;
             const m = ui.modal;
             
-            // Llenar datos básicos
-            m.header.textContent = `${u.Nombre} ${u.Apellido}`; 
-            m.id.textContent = u['ID de Usuario'];
-            m.nombre.value = u.Nombre || ''; 
-            m.apellido.value = u.Apellido || ''; 
-            m.phone.value = u.Teléfono || '';
-            m.section.value = u.Sección || 'General'; 
-            m.contract.value = u['Tipo de Contrato'] || '';
+            m.header.textContent = `${u.Nombre} ${u.Apellido}`; m.id.textContent = u['ID de Usuario'];
+            m.nombre.value = u.Nombre || ''; m.apellido.value = u.Apellido || ''; m.phone.value = u.Teléfono || '';
+            m.section.value = u.Sección || 'General'; m.contract.value = u['Tipo de Contrato'] || '';
+            m.dia.value = u['Día de Ingreso'] || ''; m.mes.value = u['Mes de Ingreso'] || 'Enero'; m.anio.value = u['Año de Ingreso'] || '';
+            m.puntos.textContent = u.Puntos || 0; m.saldo.textContent = `$${(u.SaldoAnterior||0).toLocaleString('es-CL')}`; 
+            m.ausencias.textContent = `${u.DiasAusencia?.length||0} días`; m.badge.textContent = `Total: ${u.Historial?.length||0}`;
             
-            // Llenar fecha de ingreso (Restaurado)
-            m.dia.value = u['Día de Ingreso'] || '';
-            m.mes.value = u['Mes de Ingreso'] || 'Enero';
-            m.anio.value = u['Año de Ingreso'] || '';
+            // Configurar botón de estado en modal
+            const isBlocked = u.Estado === 'Inactivo';
+            m.statusBtn.className = isBlocked 
+                ? 'px-4 py-2 rounded-lg font-bold text-xs uppercase transition-colors bg-rose-500/20 text-rose-400 border border-rose-500/50 hover:bg-rose-500/30' 
+                : 'px-4 py-2 rounded-lg font-bold text-xs uppercase transition-colors bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30';
+            m.statusBtn.innerHTML = isBlocked ? '<i class="fas fa-ban mr-2"></i> Bloqueado' : '<i class="fas fa-check-circle mr-2"></i> Habilitado';
+            m.statusBtn.onclick = async () => {
+                m.statusBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: u['ID de Usuario'], status: isBlocked ? 'Activo' : 'Inactivo' }) });
+                fetchData(); setTimeout(() => openModalById(u['ID de Usuario']), 500); // Recargar modal
+            };
 
-            // Stats
-            m.puntos.textContent = u.Puntos || 0; 
-            m.saldo.textContent = `$${(u.SaldoAnterior||0).toLocaleString('es-CL')}`; 
-            m.ausencias.textContent = `${u.DiasAusencia?.length||0} días`; 
-            m.badge.textContent = `Total: ${u.Historial?.length||0}`;
-            
-            // Historial
-            m.history.innerHTML = (u.Historial||[]).slice().reverse().slice(0,50).map(h=>{
-                const d=new Date(h); 
-                return `<li class="flex justify-between py-2 px-2 hover:bg-slate-700/30"><span>${d.toLocaleDateString('es-CL')}</span><span>${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} HRS</span></li>`
-            }).join('');
+            m.history.innerHTML = (u.Historial||[]).slice().reverse().slice(0,50).map(h=>{ const d=new Date(h); return `<li class="flex justify-between py-2 px-2 hover:bg-slate-700/30"><span>${d.toLocaleDateString('es-CL')}</span><span>${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} HRS</span></li>`}).join('');
             
             updateEditModeUI();
             m.el.classList.add('open');
         };
 
         const updateEditModeUI = () => {
-            // Habilitar/Deshabilitar TODOS los inputs incluidos fecha
             const fields = [ui.modal.nombre, ui.modal.apellido, ui.modal.phone, ui.modal.section, ui.modal.contract, ui.modal.dia, ui.modal.mes, ui.modal.anio];
             fields.forEach(f => f.disabled = !state.isEditing);
-            
             ui.modal.saveBtn.classList.toggle('hidden', !state.isEditing);
             ui.modal.editBtn.className = state.isEditing ? 'w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center' : 'w-10 h-10 rounded-xl bg-slate-700 hover:bg-indigo-600 text-white flex items-center justify-center';
         };
@@ -553,20 +580,13 @@
         ui.modal.closeBtn.onclick = () => ui.modal.el.classList.remove('open');
         document.getElementById('modal-overlay').onclick = () => ui.modal.el.classList.remove('open');
         
-        // Guardar Cambios (Incluyendo Fecha)
         ui.modal.saveBtn.onclick = async () => {
             const m = ui.modal; m.saveBtn.textContent = 'Guardando...';
             const payload = { 
-                action: 'editUser', 
-                id: state.currentUser['ID de Usuario'], 
-                nombre: m.nombre.value, 
-                apellido: m.apellido.value, 
-                telefono: m.phone.value, 
-                seccion: m.section.value, 
-                contrato: m.contract.value,
-                dia: m.dia.value,    // Restaurado
-                mes: m.mes.value,    // Restaurado
-                anio: m.anio.value   // Restaurado
+                action: 'editUser', id: state.currentUser['ID de Usuario'], 
+                nombre: m.nombre.value, apellido: m.apellido.value, telefono: m.phone.value, 
+                seccion: m.section.value, contrato: m.contract.value,
+                dia: m.dia.value, mes: m.mes.value, anio: m.anio.value
             };
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
             state.isEditing = false; updateEditModeUI(); fetchData(); m.saveBtn.textContent = 'GUARDAR CAMBIOS';
@@ -574,34 +594,21 @@
 
         ui.modal.deleteBtn.onclick = async () => { if(confirm("¿ELIMINAR SOCIO PERMANENTEMENTE?")) { await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify({action:'deleteUser',id:state.currentUser['ID de Usuario']})}); ui.modal.el.classList.remove('open'); fetchData(); }};
 
-        // Puntos
         document.querySelectorAll('.point-btn').forEach(b => b.onclick = async () => {
             const val = parseInt(b.dataset.val); ui.modal.puntos.textContent = parseInt(ui.modal.puntos.textContent) + val;
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: state.currentUser['ID de Usuario'], amount: val }) });
         });
 
-        // Saldo
         ui.saldoModal.openBtn.onclick = () => { ui.saldoModal.input.value = state.currentUser.SaldoAnterior||0; ui.saldoModal.el.classList.remove('hidden'); };
         ui.saldoModal.cancelBtn.onclick = () => ui.saldoModal.el.classList.add('hidden');
-        ui.saldoModal.saveBtn.onclick = async () => { 
-            const amount = parseFloat(ui.saldoModal.input.value);
-            ui.saldoModal.saveBtn.textContent = '...';
-            await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount }) }); 
-            ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`; 
-            ui.saldoModal.el.classList.add('hidden');
-            ui.saldoModal.saveBtn.textContent = 'Guardar';
-        };
+        ui.saldoModal.saveBtn.onclick = async () => { const amount = parseFloat(ui.saldoModal.input.value); ui.saldoModal.saveBtn.textContent = '...'; await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount }) }); ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`; ui.saldoModal.el.classList.add('hidden'); ui.saldoModal.saveBtn.textContent = 'Guardar'; };
 
-        // Ausencias
         ui.absenceModal.openBtn.onclick = () => { state.calendarDate = new Date(); renderCalendar(); ui.absenceModal.el.classList.remove('hidden'); };
         ui.absenceModal.cancelBtn.onclick = () => ui.absenceModal.el.classList.add('hidden');
         ui.absenceModal.saveBtn.onclick = async () => {
-             const dates = Array.from(ui.absenceModal.calendarContainer.querySelectorAll('.day.absent')).map(d => d.dataset.date);
-             ui.absenceModal.saveBtn.textContent = '...';
+             const dates = Array.from(ui.absenceModal.calendarContainer.querySelectorAll('.day.absent')).map(d => d.dataset.date); ui.absenceModal.saveBtn.textContent = '...';
              await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateAbsences', id: state.currentUser['ID de Usuario'], dates }) });
-             ui.modal.ausencias.textContent = `${dates.length} días`; 
-             ui.absenceModal.el.classList.add('hidden');
-             ui.absenceModal.saveBtn.textContent = 'Guardar Faltas';
+             ui.modal.ausencias.textContent = `${dates.length} días`; ui.absenceModal.el.classList.add('hidden'); ui.absenceModal.saveBtn.textContent = 'Guardar Faltas';
         };
         
         function renderCalendar() {
@@ -610,15 +617,10 @@
             const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate(), start=(first+6)%7;
             const marked = new Set((state.currentUser.DiasAusencia||[]).map(normalizarFecha));
             let h='<div class="calendar-grid">'; for(let i=0;i<start;i++)h+='<div></div>';
-            for(let i=1;i<=last;i++){ 
-                const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; 
-                h+=`<div class="day ${marked.has(ds)?'absent':''}" data-date="${ds}">${i}</div>`; 
-            }
+            for(let i=1;i<=last;i++){ const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; h+=`<div class="day ${marked.has(ds)?'absent':''}" data-date="${ds}">${i}</div>`; }
             ui.absenceModal.calendarContainer.innerHTML = h + '</div>';
             ui.absenceModal.calendarContainer.querySelectorAll('.day').forEach(d => d.onclick = () => d.classList.toggle('absent'));
         }
-
-        // Navegación Calendario
         ui.absenceModal.prevBtn.onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() - 1); renderCalendar(); };
         ui.absenceModal.nextBtn.onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() + 1); renderCalendar(); };
 
