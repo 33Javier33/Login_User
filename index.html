@@ -1,166 +1,314 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SocioComision Premium | Sincronización Total</title>
+    <meta name="theme-color" content="#020617">
+    <title>SocioComision Premium | Dashboard 2026</title>
     
+    <!-- Tailwind & Plugins -->
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#020617',
+                        surface: '#0f172a',
+                        primary: '#6366f1',
+                        accent: '#10b981',
+                        danger: '#f43f5e'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons & Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 
     <style>
-        :root {
-            --bg-main: #020617;
-            --bg-card: #0f172a;
-            --primary: #6366f1;
-            --emerald: #10b981;
-        }
-
         body {
-            background-color: var(--bg-main);
-            color: #ffffff;
+            background-color: #020617;
+            color: #f8fafc;
             font-family: 'Inter', sans-serif;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
+        /* Ambient Background */
+        .ambient-light {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 60%);
+            z-index: -1; pointer-events: none;
+        }
+        
+        /* Glass Components */
         .glass-panel {
-            background: #111827;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 1.25rem;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border-radius: 1.5rem;
         }
 
-        /* TOASTS (NOTIFICACIONES) */
+        .glass-card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-hover:active {
+            transform: scale(0.98);
+            background: rgba(30, 41, 59, 0.8);
+        }
+
+        /* Custom Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Toasts */
         #toast-container {
-            position: fixed; top: 1rem; left: 50%; transform: translateX(-50%);
+            position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px; z-index: 9999; pointer-events: none;
+            display: flex; flex-direction: column; gap: 0.75rem;
         }
         .toast {
-            background: #1e293b; color: white; padding: 1rem; border-radius: 1rem;
-            margin-bottom: 0.5rem; border-left: 6px solid var(--primary);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: flex; align-items: center; 
-            gap: 0.75rem; animation: toastIn 0.3s ease-out forwards; pointer-events: auto;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 1rem; border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            display: flex; align-items: center; gap: 1rem;
+            animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            pointer-events: auto;
         }
-        @keyframes toastIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .toast.hide { animation: toastOut 0.3s ease-in forwards; }
+        @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .toast.hide { animation: fadeOut 0.3s ease-in forwards; }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
 
-        /* INPUTS ALTO CONTRASTE */
+        /* Inputs */
+        .search-input {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .search-input:focus {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
         .editable-input {
-            background: #1e293b !important;
-            border: 2px solid #334155 !important;
+            background: rgba(255,255,255,0.03) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
             color: #ffffff !important;
-            width: 100%; padding: 0.85rem; border-radius: 0.75rem;
-            font-size: 16px; font-weight: 600;
+            width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem;
+            font-size: 0.95rem; font-weight: 500;
+            transition: all 0.2s;
+        }
+        .editable-input:focus {
+            background: rgba(255,255,255,0.08) !important;
+            border-color: #818cf8 !important;
+            outline: none;
         }
         .editable-input:disabled {
             background: transparent !important; border-color: transparent !important;
-            color: #f1f5f9 !important; font-weight: 800; opacity: 1; -webkit-text-fill-color: #f1f5f9;
+            color: #cbd5e1 !important; font-weight: 700; opacity: 1; padding-left: 0;
+            -webkit-text-fill-color: #cbd5e1;
         }
 
-        .label-style { color: #818cf8; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.3rem; display: block; }
+        .label-style { color: #64748b; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem; display: block; }
 
-        /* MODAL BOTTOM SHEET */
-        .modal-sheet { position: fixed; inset: 0; z-index: 100; display: none; align-items: flex-end; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); }
-        .modal-sheet.open { display: flex; }
+        /* Modal Sheet */
+        .modal-sheet { position: fixed; inset: 0; z-index: 100; display: none; align-items: flex-end; }
+        .modal-backdrop { 
+            position: absolute; inset: 0; background: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(4px); opacity: 0; transition: opacity 0.3s; 
+        }
         .modal-content {
             background: #0f172a; width: 100%; border-radius: 2rem 2rem 0 0;
-            max-height: 94vh; overflow-y: auto; border-top: 2px solid var(--primary);
-            transform: translateY(100%); transition: transform 0.4s ease-out;
-            padding-bottom: 80px;
+            max-height: 92vh; overflow-y: auto; border-top: 1px solid rgba(255,255,255,0.1);
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+            position: relative; z-index: 10; box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+            padding-bottom: 100px;
         }
+        .modal-sheet.open { display: flex; }
+        .modal-sheet.open .modal-backdrop { opacity: 1; }
         .modal-sheet.open .modal-content { transform: translateY(0); }
 
-        .nav-dock { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 92%; background: #1e293b; border-radius: 1.5rem; display: flex; justify-content: space-around; padding: 12px; z-index: 90; border: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { color: #64748b; font-size: 1.5rem; }
-        .nav-item.active { color: var(--primary); }
-
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        /* Navigation Dock */
+        .nav-dock { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); 
+            width: auto; min-width: 280px; 
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px);
+            border-radius: 2rem; display: flex; justify-content: space-evenly; 
+            padding: 0.75rem 1.5rem; z-index: 90; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+        }
+        .nav-item { 
+            color: #64748b; padding: 0.5rem; border-radius: 1rem; 
+            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center;
+        }
+        .nav-item.active { color: white; background: rgba(99, 102, 241, 0.2); }
+        .nav-item:active { transform: scale(0.9); }
+        
+        /* Point Buttons */
+        .point-btn {
+            position: relative; overflow: hidden;
+            transition: transform 0.1s;
+        }
+        .point-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
-
+    
+    <div class="ambient-light"></div>
     <div id="toast-container"></div>
 
-    <header class="p-6 flex justify-between items-center sticky top-0 bg-slate-950/90 backdrop-blur-md z-40 border-b border-white/10">
+    <!-- Header -->
+    <header class="p-5 flex justify-between items-center sticky top-0 bg-[#020617]/80 backdrop-blur-md z-40 border-b border-white/5">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg"><span class="material-icons-round text-white">bolt</span></div>
+            <div class="relative w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-600 to-violet-500"></div>
+                <span class="material-icons-round text-white relative z-10 text-xl">bolt</span>
+            </div>
             <div>
-                <h1 class="text-xl font-black italic tracking-tighter">SOCIO<span class="text-indigo-500">COMISION</span></h1>
-                <p id="last-update-text" class="text-[9px] font-bold text-emerald-400 uppercase">Monitor Real-Time 2026</p>
+                <h1 class="text-lg font-black italic tracking-tighter text-white leading-tight">SOCIO<span class="text-indigo-400">COMISION</span></h1>
+                <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <p id="last-update-text" class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Sistema Online</p>
+                </div>
             </div>
         </div>
-        <span id="ping-static" class="w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981]"></span>
+        <div class="flex flex-col items-end">
+             <span id="ping-static" class="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_12px_#10b981] animate-pulse-slow"></span>
+        </div>
     </header>
 
-    <main class="px-5 space-y-8 mt-4">
-        <!-- KPIs -->
+    <main class="px-4 pb-32 mt-4 space-y-8 max-w-lg mx-auto">
+        
+        <!-- KPIs Modernos -->
         <div class="grid grid-cols-3 gap-3">
-            <div class="glass-panel p-4 text-center"><p class="text-[9px] font-black text-slate-500 uppercase">Base</p><p id="total-users" class="text-xl font-black">0</p></div>
-            <div class="glass-panel p-4 text-center border-emerald-500/30"><p class="text-[9px] font-black text-emerald-500 uppercase">Sala</p><p id="active-users" class="text-xl font-black text-emerald-400">0</p></div>
-            <div class="glass-panel p-4 text-center border-rose-500/30"><p class="text-[9px] font-black text-rose-500 uppercase">Bloq</p><p id="inactive-users" class="text-xl font-black text-rose-400">0</p></div>
+            <div class="glass-panel p-3 flex flex-col items-center justify-center relative overflow-hidden group">
+                <div class="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors"></div>
+                <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-wider z-10 mb-1">Total</p>
+                <p id="total-users" class="text-2xl font-black text-white z-10 font-mono tracking-tight">0</p>
+            </div>
+            <div class="glass-panel p-3 flex flex-col items-center justify-center relative overflow-hidden group border-emerald-500/20">
+                <div class="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors"></div>
+                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider z-10 mb-1">En Sala</p>
+                <p id="active-users" class="text-2xl font-black text-emerald-400 z-10 font-mono tracking-tight">0</p>
+            </div>
+            <div class="glass-panel p-3 flex flex-col items-center justify-center relative overflow-hidden group border-rose-500/20">
+                <div class="absolute inset-0 bg-rose-500/5 group-hover:bg-rose-500/10 transition-colors"></div>
+                <p class="text-[10px] font-bold text-rose-400 uppercase tracking-wider z-10 mb-1">Bloq.</p>
+                <p id="inactive-users" class="text-2xl font-black text-rose-400 z-10 font-mono tracking-tight">0</p>
+            </div>
         </div>
 
         <!-- Monitor Real Time -->
         <section id="seccion-live">
-            <h2 class="text-[11px] font-black uppercase tracking-widest text-slate-500 mb-4 flex items-center gap-2"><span class="material-icons-round text-indigo-500 text-sm">sensors</span> Monitor Real-Time</h2>
-            <div id="live-monitor-grid" class="flex gap-4 overflow-x-auto pb-2 no-scrollbar"></div>
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h2 class="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                    <span class="material-icons-round text-indigo-400 text-sm">sensors</span> Monitor en Vivo
+                </h2>
+                <span class="text-[10px] font-bold text-slate-600 bg-slate-800/50 px-2 py-0.5 rounded-full border border-white/5">AUTO-UPDATE</span>
+            </div>
+            
+            <div id="live-monitor-grid" class="flex gap-3 overflow-x-auto pb-4 pt-1 no-scrollbar px-1 min-h-[140px]">
+                <div class="w-full flex items-center justify-center text-slate-700 text-xs font-mono animate-pulse">
+                    ESPERANDO DATOS...
+                </div>
+            </div>
         </section>
 
-        <!-- Buscador -->
+        <!-- Base de Datos -->
         <section id="seccion-db" class="space-y-4">
-            <input type="text" id="searchInput" placeholder="Nombre o ID..." class="w-full bg-slate-900 border-2 border-slate-800 rounded-2xl py-4 px-6 text-sm text-white focus:border-indigo-500 outline-none shadow-xl">
-            <div id="users-table-body" class="space-y-3"></div>
+            <div class="sticky top-[85px] z-30">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Buscar por Nombre o ID..." class="w-full search-input rounded-2xl py-4 pl-12 pr-4 text-sm text-white placeholder-slate-500 outline-none font-medium">
+                    <span class="material-icons-round absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                </div>
+            </div>
+            
+            <div id="users-table-body" class="space-y-3 pb-10"></div>
         </section>
+
     </main>
 
     <!-- Modal Principal -->
     <div id="userDetailsModal" class="modal-sheet">
-        <div class="absolute inset-0" id="modal-overlay"></div>
+        <div class="modal-backdrop" id="modal-overlay"></div>
         <div class="modal-content no-scrollbar">
-            <div class="sticky top-0 bg-slate-900 p-6 border-b border-white/10 flex justify-between items-center z-50">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-[#0f172a]/95 backdrop-blur-xl p-6 border-b border-white/5 flex justify-between items-start z-50">
                 <div>
-                    <h3 id="modal-header-display" class="text-2xl font-black italic text-white leading-none">--</h3>
-                    <p class="text-indigo-400 font-mono text-[10px] font-bold mt-1 uppercase">ID: <span id="modal-id">--</span></p>
+                    <h3 id="modal-header-display" class="text-2xl font-black italic text-white leading-none tracking-tight">--</h3>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700 text-[10px] font-mono font-bold text-slate-400 uppercase">ID: <span id="modal-id" class="text-indigo-400">--</span></span>
+                    </div>
                 </div>
                 <div class="flex gap-2">
-                    <button id="toggleEditBtn" class="w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center shadow-lg"><i class="fas fa-edit"></i></button>
-                    <button id="closeModalBtn" class="w-12 h-12 rounded-2xl bg-slate-800 text-rose-500 flex items-center justify-center shadow-lg"><i class="fas fa-times"></i></button>
+                    <button id="toggleEditBtn" class="w-10 h-10 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center shadow-lg transition-colors border border-white/5"><i class="fas fa-pen text-xs"></i></button>
+                    <button id="closeModalBtn" class="w-10 h-10 rounded-xl bg-slate-800 text-rose-400 hover:text-rose-500 hover:bg-rose-500/10 flex items-center justify-center shadow-lg transition-colors border border-white/5"><i class="fas fa-times text-sm"></i></button>
                 </div>
             </div>
 
             <div class="p-6 space-y-8">
-                <button id="modal-status-toggle" class="w-full py-4 rounded-xl font-black text-[11px] uppercase shadow-md transition-all"></button>
+                <!-- Status Action -->
+                <button id="modal-status-toggle" class="w-full py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg transition-all transform active:scale-[0.98] border border-transparent"></button>
 
-                <div class="bg-gradient-to-br from-indigo-600 to-indigo-900 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden">
-                    <p class="text-[10px] font-black uppercase tracking-widest opacity-80 mb-2">Puntos Disponibles</p>
-                    <div class="flex items-center justify-between">
-                        <span id="modal-puntos-display" class="text-6xl font-black tracking-tighter">0</span>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button class="w-11 h-11 rounded-xl bg-white/10 font-bold point-btn" data-val="-10">-10</button>
-                            <button class="w-11 h-11 rounded-xl bg-white/10 font-bold point-btn" data-val="10">+10</button>
-                            <button class="w-11 h-11 rounded-xl bg-white/10 font-bold point-btn" data-val="-1">-1</button>
-                            <button class="w-11 h-11 rounded-xl bg-white text-indigo-900 font-black point-btn" data-val="1">+1</button>
-                        </div>
+                <!-- Points Card -->
+                <div class="bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 rounded-[2rem] p-6 text-white shadow-2xl shadow-indigo-900/40 relative overflow-hidden group">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-700"></div>
+                    
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-1">Saldo de Puntos</p>
+                        <span id="modal-puntos-display" class="text-6xl font-black tracking-tighter drop-shadow-lg">0</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-4 gap-3">
+                        <button class="aspect-square rounded-2xl bg-black/20 hover:bg-black/30 text-white font-bold text-xs point-btn border border-white/5 backdrop-blur-sm" data-val="-10">-10</button>
+                        <button class="aspect-square rounded-2xl bg-black/20 hover:bg-black/30 text-white font-bold text-xs point-btn border border-white/5 backdrop-blur-sm" data-val="-1">-1</button>
+                        <button class="aspect-square rounded-2xl bg-white/20 hover:bg-white/30 text-white font-bold text-xs point-btn border border-white/10 backdrop-blur-sm" data-val="1">+1</button>
+                        <button class="aspect-square rounded-2xl bg-white text-indigo-900 font-black text-sm point-btn shadow-lg" data-val="10">+10</button>
                     </div>
                 </div>
 
+                <!-- Stats Grid -->
                 <div class="grid grid-cols-2 gap-4">
-                    <div id="openSaldoModalBtn" class="bg-slate-900 p-5 rounded-3xl border border-white/5"><p class="label-style">Saldo Anterior</p><p id="modal-saldo-anterior" class="text-2xl font-mono font-black text-white">$0</p></div>
-                    <div id="openAbsenceModalBtn" class="bg-slate-900 p-5 rounded-3xl border border-white/5"><p class="label-style text-rose-400">Ausencias</p><p id="modal-dias-ausencia" class="text-2xl font-mono font-black text-white">0 d</p></div>
+                    <div id="openSaldoModalBtn" class="glass-panel p-4 active:scale-95 transition-transform cursor-pointer group">
+                        <p class="label-style group-hover:text-indigo-400 transition-colors">Saldo Anterior</p>
+                        <p id="modal-saldo-anterior" class="text-xl font-mono font-bold text-white tracking-tight">$0</p>
+                    </div>
+                    <div id="openAbsenceModalBtn" class="glass-panel p-4 active:scale-95 transition-transform cursor-pointer border-rose-500/20 group">
+                        <p class="label-style text-rose-400/80 group-hover:text-rose-400 transition-colors">Ausencias</p>
+                        <p id="modal-dias-ausencia" class="text-xl font-mono font-bold text-rose-100 tracking-tight">0 <span class="text-xs text-rose-400 font-sans font-bold">Días</span></p>
+                    </div>
                 </div>
 
-                <div class="space-y-6">
+                <!-- Details Form -->
+                <div class="space-y-5 bg-slate-800/30 p-5 rounded-2xl border border-white/5">
                     <div class="grid grid-cols-2 gap-4">
                         <div><label class="label-style">Nombre</label><input type="text" id="modal-nombre" class="editable-input" disabled></div>
                         <div><label class="label-style">Apellido</label><input type="text" id="modal-apellido" class="editable-input" disabled></div>
                     </div>
-                    <div><label class="label-style">Teléfono</label><input type="text" id="modal-telefono" class="editable-input" disabled></div>
+                    <div><label class="label-style">Teléfono</label><input type="text" id="modal-telefono" class="editable-input font-mono" disabled></div>
                     
                     <div class="grid grid-cols-3 gap-2">
-                        <div><label class="label-style">Día</label><input type="number" id="modal-dia" class="editable-input text-center" disabled></div>
-                        <div><label class="label-style">Mes</label><select id="modal-mes" class="editable-input" disabled><option value="Enero">Enero</option><option value="Febrero">Febrero</option><option value="Marzo">Marzo</option><option value="Abril">Abril</option><option value="Mayo">Mayo</option><option value="Junio">Junio</option><option value="Julio">Julio</option><option value="Agosto">Agosto</option><option value="Septiembre">Septiembre</option><option value="Octubre">Octubre</option><option value="Noviembre">Noviembre</option><option value="Diciembre">Diciembre</option></select></div>
-                        <div><label class="label-style">Año</label><input type="number" id="modal-anio" class="editable-input text-center" disabled></div>
+                        <div><label class="label-style text-center">Día</label><input type="number" id="modal-dia" class="editable-input text-center" disabled></div>
+                        <div><label class="label-style">Mes</label><select id="modal-mes" class="editable-input appearance-none" disabled><option value="Enero">Ene</option><option value="Febrero">Feb</option><option value="Marzo">Mar</option><option value="Abril">Abr</option><option value="Mayo">May</option><option value="Junio">Jun</option><option value="Julio">Jul</option><option value="Agosto">Ago</option><option value="Septiembre">Sep</option><option value="Octubre">Oct</option><option value="Noviembre">Nov</option><option value="Diciembre">Dic</option></select></div>
+                        <div><label class="label-style text-center">Año</label><input type="number" id="modal-anio" class="editable-input text-center" disabled></div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -169,48 +317,85 @@
                     </div>
                 </div>
 
-                <button id="saveChangesBtn" class="hidden w-full py-5 bg-emerald-600 text-white rounded-2xl font-black uppercase text-sm tracking-widest shadow-lg">Confirmar Cambios en BD</button>
+                <button id="saveChangesBtn" class="hidden w-full py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-emerald-900/20 transition-all">
+                    Guardar Cambios
+                </button>
                 
                 <!-- Historial -->
-                <div class="pt-6 border-t border-white/10">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Registros de Acceso</h4>
-                        <span id="modal-total-visitas-badge" class="px-3 py-1 bg-indigo-500/10 rounded text-indigo-400 font-bold text-[10px]">Total: 0</span>
+                <div class="pt-2">
+                    <div class="flex justify-between items-end mb-4 px-1">
+                        <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest">Historial de Acceso</h4>
+                        <span id="modal-total-visitas-badge" class="px-2 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-md text-indigo-300 font-bold text-[10px] font-mono">Total: 0</span>
                     </div>
-                    <ul id="modal-historial-lista" class="space-y-2 max-h-48 overflow-y-auto no-scrollbar text-[11px] font-mono"></ul>
+                    <ul id="modal-historial-lista" class="space-y-0 divide-y divide-white/5 max-h-40 overflow-y-auto custom-scrollbar text-[11px] font-mono bg-slate-900/50 rounded-xl border border-white/5"></ul>
                 </div>
 
-                <!-- ELIMINAR -->
-                <button id="deleteUserBtn" class="w-full py-4 text-rose-500/40 font-bold text-[10px] uppercase tracking-widest border border-dashed border-rose-500/20 rounded-xl mt-4 active:bg-rose-600 active:text-white transition-all">
-                    <i class="fas fa-trash-alt mr-2"></i> Eliminar Socio Definitivamente
-                </button>
+                <!-- Danger Zone -->
+                <div class="pt-6 border-t border-white/5">
+                    <button id="deleteUserBtn" class="w-full py-4 text-rose-500/50 font-bold text-[10px] uppercase tracking-widest border border-dashed border-rose-500/20 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 hover:border-rose-500/40 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-trash-alt"></i> Eliminar Socio Definitivamente
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modales Auxiliares -->
-    <div id="saldoModal" class="hidden fixed inset-0 z-[120] bg-black/95 flex items-center justify-center p-10 backdrop-blur-md">
-        <div class="glass-panel w-full max-w-xs p-8 space-y-6 text-center">
-            <h3 class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Ajustar Saldo</h3>
-            <input type="number" id="saldoInput" class="w-full bg-transparent border-none text-5xl font-mono font-black text-center text-indigo-400 focus:ring-0">
-            <div class="flex flex-col gap-2"><button id="saveSaldoBtn" class="w-full py-4 bg-emerald-500 text-white rounded-xl font-black uppercase text-xs">Guardar</button><button id="cancelSaldoBtn" class="w-full py-2 text-slate-500 font-bold uppercase text-[10px]">Cerrar</button></div>
+    <!-- Modal Saldo (Auxiliar) -->
+    <div id="saldoModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-sm p-8 space-y-6 text-center transform scale-100 transition-all">
+            <div class="w-12 h-12 bg-indigo-500/20 text-indigo-400 rounded-full flex items-center justify-center mx-auto mb-2"><i class="fas fa-wallet"></i></div>
+            <h3 class="text-xs font-black uppercase text-slate-400 tracking-widest">Ajustar Saldo Anterior</h3>
+            <input type="number" id="saldoInput" class="w-full bg-transparent border-none text-5xl font-mono font-black text-center text-white focus:ring-0 placeholder-slate-700" placeholder="0">
+            <div class="grid grid-cols-2 gap-3 pt-4">
+                <button id="cancelSaldoBtn" class="py-3 bg-slate-800 text-slate-400 rounded-xl font-bold uppercase text-[10px] tracking-wide">Cancelar</button>
+                <button id="saveSaldoBtn" class="py-3 bg-emerald-500 text-white rounded-xl font-black uppercase text-[10px] tracking-wide shadow-lg shadow-emerald-500/20">Guardar</button>
+            </div>
         </div>
     </div>
 
-    <div id="absenceModal" class="hidden fixed inset-0 z-[120] bg-black/95 flex items-end justify-center backdrop-blur-md">
-        <div class="glass-panel w-full rounded-b-none p-6 pb-12 space-y-6">
-            <div class="flex justify-between items-center text-white"><button id="prevMonthBtn" class="w-10 h-10 bg-slate-800 rounded-xl"><i class="fas fa-chevron-left"></i></button><h4 id="monthYear" class="font-black text-sm uppercase"></h4><button id="nextMonthBtn" class="w-10 h-10 bg-slate-800 rounded-xl"><i class="fas fa-chevron-right"></i></button></div>
-            <div id="calendar-container" class="grid grid-cols-7 gap-1"></div>
-            <div class="flex flex-col gap-2"><button id="saveAbsenceBtn" class="w-full py-4 bg-rose-500 text-white rounded-2xl font-black uppercase text-xs">Guardar Faltas</button><button id="cancelAbsenceBtn" class="w-full py-2 text-slate-500 font-bold text-[10px] uppercase">Cerrar</button></div>
+    <!-- Modal Ausencias (Auxiliar) -->
+    <div id="absenceModal" class="hidden fixed inset-0 z-[120] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full sm:max-w-sm sm:rounded-[2rem] rounded-b-none rounded-t-[2rem] p-6 pb-12 space-y-6 border-t border-white/10 sm:border-t-white/10">
+            <div class="flex justify-between items-center text-white mb-2">
+                <button id="prevMonthBtn" class="w-10 h-10 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center"><i class="fas fa-chevron-left text-sm"></i></button>
+                <h4 id="monthYear" class="font-black text-sm uppercase tracking-widest"></h4>
+                <button id="nextMonthBtn" class="w-10 h-10 hover:bg-white/10 rounded-xl transition-colors flex items-center justify-center"><i class="fas fa-chevron-right text-sm"></i></button>
+            </div>
+            
+            <div class="grid grid-cols-7 text-center mb-2">
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Do</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Lu</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Ma</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Mi</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Ju</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Vi</span>
+                <span class="text-[9px] font-bold text-slate-500 uppercase">Sa</span>
+            </div>
+            <div id="calendar-container" class="grid grid-cols-7 gap-1.5"></div>
+            
+            <div class="flex flex-col gap-3 pt-4">
+                <button id="saveAbsenceBtn" class="w-full py-4 bg-rose-500 hover:bg-rose-400 text-white rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-rose-900/20 transition-all">Actualizar Faltas</button>
+                <button id="cancelAbsenceBtn" class="w-full py-3 text-slate-500 font-bold text-[10px] uppercase tracking-widest hover:text-white transition-colors">Cerrar Calendario</button>
+            </div>
         </div>
     </div>
 
+    <!-- Navegación Flotante -->
     <nav class="nav-dock">
-        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="nav-item active"><span class="material-icons-round">home</span></button>
-        <a href="#seccion-live" class="nav-item"><span class="material-icons-round">bolt</span></a>
-        <a href="#seccion-db" class="nav-item"><span class="material-icons-round">search</span></a>
+        <button onclick="window.scrollTo({top:0, behavior:'smooth'})" class="nav-item active group">
+            <span class="material-icons-round text-2xl group-active:scale-90 transition-transform">home</span>
+        </button>
+        <div class="w-px h-6 bg-white/10"></div>
+        <a href="#seccion-live" class="nav-item group">
+            <span class="material-icons-round text-2xl group-active:scale-90 transition-transform">bolt</span>
+        </a>
+        <div class="w-px h-6 bg-white/10"></div>
+        <a href="#seccion-db" class="nav-item group">
+            <span class="material-icons-round text-2xl group-active:scale-90 transition-transform">search</span>
+        </a>
     </nav>
 
+    <!-- LOGIC SCRIPT (INTACT) -->
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCs74u0wnowFhgAbYM_EL11eEyOH4GivGzwg1v0ovMLW6QvwqOuL9HRhxmAwL9m8X6/exec';
@@ -237,20 +422,35 @@
 
         const safe = str => str ? String(str).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#039;'}[m])) : '';
         const parseDate = d => { const i = new Date(d); return isNaN(i) ? null : i; };
-        const normalizarFecha = f => { if(!f)return null; const d=new Date(f); return isNaN(d.getTime())?f:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+        
+        // CORRECCIÓN 1: Normalizar fecha robusta para evitar errores de Zona Horaria (UTC vs Local)
+        const normalizarFecha = f => { 
+            if(!f) return null;
+            // Si ya es un string tipo YYYY-MM-DD, lo devolvemos tal cual (corta la parte de la hora si existe)
+            if (typeof f === 'string') return f.split('T')[0];
+            
+            // Si es objeto Date, forzamos formato local manual
+            const d = new Date(f); 
+            if (isNaN(d.getTime())) return f;
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; 
+        };
 
         const showToast = (user, type) => {
             if(!user) return;
             const t = document.createElement('div');
-            t.className = `toast border-l-4 ${type === 'connect' ? 'border-emerald-500' : 'border-amber-500'}`;
-            t.innerHTML = `<span class="material-icons-round ${type === 'connect' ? 'text-emerald-400' : 'text-amber-400'}">${type === 'connect' ? 'login' : 'logout'}</span>
-                           <div><p class="text-[9px] font-black uppercase opacity-60">SocioFlow Update</p>
-                           <p class="text-xs font-bold text-white">${safe(user.Nombre)} ${type === 'connect' ? 'INGRESÓ' : 'SALIÓ'}</p></div>`;
+            const isConnect = type === 'connect';
+            t.className = `toast border-l-4 ${isConnect ? 'border-emerald-500' : 'border-amber-500'}`;
+            t.innerHTML = `<div class="w-8 h-8 rounded-full flex items-center justify-center ${isConnect ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">
+                                <span class="material-icons-round text-lg">${isConnect ? 'login' : 'logout'}</span>
+                           </div>
+                           <div>
+                               <p class="text-[9px] font-black uppercase opacity-60 tracking-wider">Actividad</p>
+                               <p class="text-xs font-bold text-white">${safe(user.Nombre)} ${isConnect ? 'ha ingresado' : 'ha salido'}</p>
+                           </div>`;
             ui.toastContainer.appendChild(t);
             setTimeout(() => { t.classList.add('hide'); setTimeout(() => t.remove(), 500); }, 4500);
         };
 
-        // LÓGICA DE HORA CORRECTA
         const getLatestSocioTime = (u) => {
             const allDates = [parseDate(u.Timestamp)];
             if (u.Historial && Array.isArray(u.Historial)) {
@@ -276,9 +476,14 @@
                 state.previousActiveIds = currentActiveIds;
 
                 renderAll();
+                // Si el modal está abierto, actualizamos datos en tiempo real (útil para historial)
                 if (ui.modal.el.classList.contains('open') && state.currentUser) {
-                    const u = state.users.find(x => x['ID de Usuario'] === state.currentUser['ID de Usuario']);
-                    if(u) refreshModalHistory(u);
+                    // Cuidado: No sobrescribir estado de edición
+                    if(!state.isEditing) {
+                        const u = state.users.find(x => x['ID de Usuario'] === state.currentUser['ID de Usuario']);
+                        // Solo actualizamos historial para no romper inputs
+                        if(u) refreshModalHistory(u);
+                    }
                 }
             } catch(e) { console.error(e); } finally { state.isFetching = false; }
         };
@@ -291,14 +496,19 @@
             ui.liveGrid.innerHTML = state.users.filter(u => u.Estado === 'Activo').map(u => {
                 const latestDate = getLatestSocioTime(u);
                 const timeStr = latestDate.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-                const visitas = u.Historial?.length || 0;
                 
-                return `<div class="glass-panel p-4 min-w-[125px] text-center relative active:scale-95 transition-transform" onclick="openModalById('${u['ID de Usuario']}')">
-                            <button class="btn-kick absolute top-1 right-1 text-slate-600" data-id="${u['ID de Usuario']}"><span class="material-icons-round text-sm">cancel</span></button>
-                            <div class="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center font-black text-indigo-400 mx-auto mb-2 border border-indigo-500/30">${u.Nombre[0]}${u.Apellido[0]}</div>
-                            <p class="font-bold text-[10px] text-white truncate">${safe(u.Nombre)}</p>
-                            <p class="text-[9px] text-emerald-500 font-mono font-bold mt-1">${timeStr}</p>
-                            <span class="text-[8px] bg-indigo-500/10 text-indigo-300 px-1 rounded mt-1 inline-block uppercase font-black">${visitas} VISITAS</span>
+                return `<div class="glass-panel p-4 min-w-[130px] flex flex-col items-center justify-between relative active:scale-95 transition-transform glass-card-hover" onclick="openModalById('${u['ID de Usuario']}')">
+                            <button class="btn-kick absolute top-2 right-2 text-slate-500 hover:text-rose-500 transition-colors z-20" data-id="${u['ID de Usuario']}"><span class="material-icons-round text-sm">close</span></button>
+                            <div class="relative mb-2 mt-1">
+                                <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full flex items-center justify-center font-black text-white shadow-lg shadow-indigo-500/30 text-lg border-2 border-white/10">
+                                    ${u.Nombre ? u.Nombre[0] : '?'}${u.Apellido ? u.Apellido[0] : '?'}
+                                </div>
+                                <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-[#0f172a] rounded-full animate-pulse"></span>
+                            </div>
+                            <div class="text-center w-full">
+                                <p class="font-bold text-xs text-white truncate w-full px-1">${safe(u.Nombre)}</p>
+                                <p class="text-[10px] text-emerald-400 font-mono font-bold mt-0.5 bg-emerald-500/10 rounded px-1.5 py-0.5 inline-block border border-emerald-500/10">${timeStr}</p>
+                            </div>
                         </div>`;
             }).join('');
             document.querySelectorAll('.btn-kick').forEach(b => b.onclick = e => { e.stopPropagation(); kickUser(b); });
@@ -308,13 +518,30 @@
         const renderList = () => {
             const search = ui.searchInput.value.toLowerCase();
             const filtered = state.users.filter(u => (u.Nombre + u.Apellido + u['ID de Usuario']).toLowerCase().includes(search));
+            
             ui.tableBody.innerHTML = filtered.map(u => {
                 const blocked = u.Estado === 'Inactivo';
                 const visitas = u.Historial?.length || 0;
-                return `<div class="glass-panel p-5 flex justify-between items-center active:bg-slate-800 transition-colors" onclick="openModalById('${u['ID de Usuario']}')">
-                            <div><p class="font-bold text-sm text-white">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
-                            <p class="text-[10px] text-slate-500 font-mono mt-1">ID: ${u['ID de Usuario']} • <span class="text-indigo-400 font-bold">Año: ${u['Año de Ingreso'] || '2026'}</span> • <span class="text-indigo-300">${visitas} Visitas</span></p></div>
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center ${blocked?'bg-rose-500/10 text-rose-500':'bg-emerald-500/10 text-emerald-500'}"><span class="material-icons-round text-lg">${blocked?'lock':'check_circle'}</span></div>
+                return `<div class="glass-panel p-4 flex justify-between items-center active:bg-white/5 transition-all cursor-pointer group hover:border-indigo-500/30" onclick="openModalById('${u['ID de Usuario']}')">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-full ${blocked ? 'bg-rose-500/10 text-rose-500' : 'bg-slate-700 text-slate-300'} flex items-center justify-center font-bold text-xs border border-white/5">
+                                    ${u.Nombre[0]}${u.Apellido[0]}
+                                </div>
+                                <div>
+                                    <p class="font-bold text-sm text-white group-hover:text-indigo-300 transition-colors">${safe(u.Nombre)} ${safe(u.Apellido)}</p>
+                                    <p class="text-[10px] text-slate-500 font-mono mt-0.5 flex items-center gap-2">
+                                        <span class="bg-slate-800 px-1.5 rounded text-slate-400">ID: ${u['ID de Usuario']}</span>
+                                        <span class="text-slate-600">•</span>
+                                        <span>${visitas} Visitas</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                ${blocked 
+                                    ? `<span class="material-icons-round text-rose-500 bg-rose-500/10 p-1.5 rounded-lg text-sm">block</span>` 
+                                    : `<span class="material-icons-round text-slate-600 group-hover:text-indigo-400 transition-colors text-lg">chevron_right</span>`
+                                }
+                            </div>
                         </div>`;
             }).join('');
         };
@@ -322,7 +549,11 @@
         const refreshModalHistory = (u) => {
             const sortedHistory = [...(u.Historial || [])].map(h => parseDate(h)).filter(d => d !== null).sort((a, b) => b - a);
             ui.modal.badge.textContent = `Total: ${sortedHistory.length}`;
-            ui.modal.history.innerHTML = sortedHistory.slice(0, 20).map(d => `<li class="flex justify-between py-2 border-b border-white/5 text-[11px] text-white font-bold"><span>${d.toLocaleDateString('es-CL')}</span><span class="text-indigo-400 font-black">${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})} HRS</span></li>`).join('');
+            ui.modal.history.innerHTML = sortedHistory.slice(0, 20).map(d => `
+                <li class="flex justify-between py-2.5 px-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0">
+                    <span class="text-slate-400">${d.toLocaleDateString('es-CL', {day:'2-digit', month:'short'})}</span>
+                    <span class="text-indigo-400 font-bold bg-indigo-500/10 px-1.5 rounded">${d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                </li>`).join('');
         };
 
         window.openModalById = id => {
@@ -338,10 +569,15 @@
             m.ausencias.textContent = `${u.DiasAusencia?.length||0} d`;
 
             const isBlocked = u.Estado === 'Inactivo';
-            m.statusBtn.className = isBlocked ? 'w-full py-4 rounded-xl font-black text-[11px] bg-rose-600 text-white shadow-lg' : 'w-full py-4 rounded-xl font-black text-[11px] bg-emerald-600 text-white shadow-lg';
-            m.statusBtn.textContent = isBlocked ? 'DESBLOQUEAR SOCIO' : 'BLOQUEAR SOCIO';
+            m.statusBtn.className = isBlocked 
+                ? 'w-full py-4 rounded-xl font-black text-[10px] bg-slate-800 text-white border border-slate-700 hover:bg-slate-700' 
+                : 'w-full py-4 rounded-xl font-black text-[10px] bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500/20';
+            m.statusBtn.innerHTML = isBlocked 
+                ? '<i class="fas fa-unlock mr-2"></i> DESBLOQUEAR SOCIO' 
+                : '<i class="fas fa-ban mr-2"></i> BLOQUEAR SOCIO';
+            
             m.statusBtn.onclick = async () => {
-                m.statusBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                m.statusBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESANDO...';
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: u['ID de Usuario'], status: isBlocked ? 'Activo' : 'Inactivo' }) });
                 fetchData(); setTimeout(() => openModalById(u['ID de Usuario']), 500);
             };
@@ -355,19 +591,21 @@
             const fields = [ui.modal.nombre, ui.modal.apellido, ui.modal.phone, ui.modal.section, ui.modal.contract, ui.modal.dia, ui.modal.mes, ui.modal.anio];
             fields.forEach(f => f.disabled = !state.isEditing);
             ui.modal.saveBtn.classList.toggle('hidden', !state.isEditing);
-            ui.modal.editBtn.className = state.isEditing ? 'w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center' : 'w-12 h-12 rounded-2xl bg-slate-800 text-white flex items-center justify-center';
+            ui.modal.editBtn.className = state.isEditing 
+                ? 'w-10 h-10 rounded-xl bg-indigo-600 text-white shadow-lg flex items-center justify-center' 
+                : 'w-10 h-10 rounded-xl bg-slate-800 text-slate-300 hover:text-white flex items-center justify-center border border-white/5';
         };
 
         ui.modal.editBtn.onclick = () => { state.isEditing = !state.isEditing; updateEditModeUI(); };
         ui.modal.closeBtn.onclick = () => ui.modal.el.classList.remove('open');
         ui.modal.saveBtn.onclick = async () => {
-            ui.modal.saveBtn.textContent = 'PROCESANDO...';
+            ui.modal.saveBtn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> GUARDANDO...';
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'editUser', id: state.currentUser['ID de Usuario'], nombre: ui.modal.nombre.value, apellido: ui.modal.apellido.value, telefono: ui.modal.phone.value, seccion: ui.modal.section.value, contrato: ui.modal.contract.value, dia: ui.modal.dia.value, mes: ui.modal.mes.value, anio: ui.modal.anio.value }) });
-            state.isEditing = false; updateEditModeUI(); fetchData(); ui.modal.saveBtn.textContent = 'Confirmar Cambios en BD';
+            state.isEditing = false; updateEditModeUI(); fetchData(); ui.modal.saveBtn.textContent = 'Guardar Cambios';
         };
 
         ui.modal.deleteBtn.onclick = async () => {
-            if (confirm(`¿ELIMINAR A ${state.currentUser.Nombre.toUpperCase()} DEFINITIVAMENTE?`)) {
+            if (confirm(`⚠️ ALERTA DE SEGURIDAD\n\n¿Estás seguro de eliminar a ${state.currentUser.Nombre.toUpperCase()} permanentemente?`)) {
                 ui.modal.deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ELIMINANDO...';
                 await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'deleteUser', id: state.currentUser['ID de Usuario'] }) });
                 ui.modal.el.classList.remove('open');
@@ -376,40 +614,80 @@
         };
 
         document.querySelectorAll('.point-btn').forEach(b => b.onclick = async () => {
-            const val = parseInt(b.dataset.val); ui.modal.puntos.textContent = parseInt(ui.modal.puntos.textContent) + val;
+            const val = parseInt(b.dataset.val); 
+            const current = parseInt(ui.modal.puntos.textContent);
+            ui.modal.puntos.textContent = current + val;
+            
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updatePoints', id: state.currentUser['ID de Usuario'], amount: val }) });
         });
 
         const kickUser = async btn => {
-            if(!confirm("¿CONFIRMAR KICK?")) return;
+            if(!confirm("¿CONFIRMAR EXPULSIÓN DE LA SALA?")) return;
+            btn.innerHTML = '<span class="material-icons-round text-sm animate-spin">sync</span>';
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateStatus', id: btn.dataset.id, status: 'KICK' }) });
             fetchData();
         };
 
         function renderCalendar() {
-            const y=state.calendarDate.getFullYear(), m=state.calendarDate.getMonth();
-            ui.absenceModal.monthYear.textContent = `${["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"][m]} ${y}`;
-            const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate(), start=(first+6)%7;
-            const marked = new Set((state.currentUser.DiasAusencia||[]).map(normalizarFecha));
-            let h=''; for(let i=0;i<start;i++)h+='<div></div>';
-            for(let i=1;i<=last;i++){ const ds=`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`; h+=`<div class="aspect-square flex items-center justify-center rounded-lg text-xs font-bold ${marked.has(ds)?'bg-rose-500 text-white':'bg-slate-800'}" data-date="${ds}">${i}</div>`; }
+            const y = state.calendarDate.getFullYear();
+            const m = state.calendarDate.getMonth();
+            const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            ui.absenceModal.monthYear.textContent = `${monthNames[m]} ${y}`;
+            
+            const first = new Date(y, m, 1).getDay(); // 0=Domingo
+            const last = new Date(y, m + 1, 0).getDate();
+            
+            // CORRECCIÓN 2: Asegurar que marked use el formato normalizado estricto
+            const marked = new Set((state.currentUser.DiasAusencia || []).map(normalizarFecha));
+            
+            let h=''; 
+            for(let i=0; i<first; i++) h+=`<div class="aspect-square"></div>`;
+            
+            for(let i=1; i<=last; i++){ 
+                const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                const isMarked = marked.has(ds);
+                
+                // Toggle Logic simplificado visualmente
+                h+=`<div class="aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all cursor-pointer select-none border border-transparent
+                    ${isMarked 
+                        ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/30 scale-105 marked-day' 
+                        : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:border-slate-600'}" 
+                    data-date="${ds}" 
+                    onclick="this.classList.toggle('bg-rose-500'); this.classList.toggle('marked-day'); this.classList.toggle('text-white'); this.classList.toggle('shadow-lg'); this.classList.toggle('scale-105'); this.classList.toggle('bg-slate-800'); this.classList.toggle('text-slate-400');">
+                    ${i}</div>`; 
+            }
             ui.absenceModal.calendarContainer.innerHTML = h;
-            ui.absenceModal.calendarContainer.querySelectorAll('div[data-date]').forEach(d => d.onclick = () => d.classList.toggle('bg-rose-500'));
         }
 
         ui.absenceModal.prevBtn.onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() - 1); renderCalendar(); };
         ui.absenceModal.nextBtn.onclick = () => { state.calendarDate.setMonth(state.calendarDate.getMonth() + 1); renderCalendar(); };
+        
+        // CORRECCIÓN 3: Actualizar estado local inmediatamente al guardar
         ui.absenceModal.saveBtn.onclick = async () => {
+             ui.absenceModal.saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> GUARDANDO...';
+             
+             // Capturamos los elementos que tienen la clase visual 'marked-day' o 'bg-rose-500'
              const dates = Array.from(ui.absenceModal.calendarContainer.querySelectorAll('.bg-rose-500')).map(d => d.dataset.date);
+             
+             // ACTUALIZAR MEMORIA LOCAL (Para que al volver a abrir se vea reflejado)
+             state.currentUser.DiasAusencia = dates;
+             
              await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateAbsences', id: state.currentUser['ID de Usuario'], dates }) });
-             ui.modal.ausencias.textContent = `${dates.length} d`; document.getElementById('absenceModal').classList.add('hidden');
+             
+             ui.modal.ausencias.textContent = `${dates.length} d`; 
+             document.getElementById('absenceModal').classList.add('hidden');
+             ui.absenceModal.saveBtn.textContent = 'Actualizar Faltas';
         };
         
         document.getElementById('openSaldoModalBtn').onclick = () => { document.getElementById('saldoInput').value = state.currentUser.SaldoAnterior||0; document.getElementById('saldoModal').classList.remove('hidden'); };
         document.getElementById('saveSaldoBtn').onclick = async () => { 
             const amount = parseFloat(document.getElementById('saldoInput').value);
+            document.getElementById('saveSaldoBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify({ action: 'updateSaldo', id: state.currentUser['ID de Usuario'], amount }) });
+            // Actualizar local
+            state.currentUser.SaldoAnterior = amount;
             ui.modal.saldo.textContent = `$${amount.toLocaleString('es-CL')}`; document.getElementById('saldoModal').classList.add('hidden');
+            document.getElementById('saveSaldoBtn').textContent = 'Guardar';
         };
         document.getElementById('cancelSaldoBtn').onclick = () => document.getElementById('saldoModal').classList.add('hidden');
         document.getElementById('openAbsenceModalBtn').onclick = () => { state.calendarDate = new Date(); renderCalendar(); document.getElementById('absenceModal').classList.remove('hidden'); };
